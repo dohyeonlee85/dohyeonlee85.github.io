@@ -39,11 +39,15 @@ def google_services():
 
 
 def r2_client():
+    # 계정 ID: 공백·주소가 섞여 들어가도 32자리 ID만 뽑아 씀
+    found = re.search(r'[0-9a-f]{32}', os.environ['R2_ACCOUNT_ID'].lower())
+    if not found:
+        sys.exit('R2_ACCOUNT_ID 값 확인 필요 (32자리 영문·숫자)')
     return boto3.client(
         's3',
-        endpoint_url=f"https://{os.environ['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com",
-        aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
-        aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'],
+        endpoint_url=f"https://{found.group()}.r2.cloudflarestorage.com",
+        aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'].strip(),
+        aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'].strip(),
         region_name='auto')
 
 
@@ -98,7 +102,7 @@ def make_images(raw):
 
 
 def put(r2, key, data):
-    r2.put_object(Bucket=os.environ['R2_BUCKET'], Key=key, Body=data,
+    r2.put_object(Bucket=os.environ['R2_BUCKET'].strip(), Key=key, Body=data,
                   ContentType='image/webp',
                   CacheControl='public, max-age=31536000, immutable')
 
