@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>shop</title>
+<!-- 웹폰트: 영문·숫자 EB Garamond(세리프) + 한글 Pretendard (필요한 글자만 내려받음) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -38,6 +44,32 @@
   </div>
   <button id="ask" type="button">카카오톡 문의하기</button>
 </section>
+
+<!-- 카카오톡 문의 안내 -->
+<div id="guide" hidden>
+  <div class="sheet">
+    <h3>카카오톡으로 문의하기</h3>
+    <div class="gitem">
+      <img id="gthumb" alt="" draggable="false">
+      <div><p id="gid"></p><p id="gprice"></p></div>
+    </div>
+    <ol class="steps">
+      <li><b>1</b><div>아래 <em>노란 버튼</em>을 누르세요<small>(문의 내용이 자동으로 복사돼요)</small></div></li>
+      <li><b>2</b><div>카톡이 열리면 <em>'메시지 입력'</em> 칸을 <em>꾹</em> 누르세요</div></li>
+      <li><b>3</b><div><em>'붙여넣기'</em>를 누르고, <em>노란 전송</em> 버튼을 누르세요</div></li>
+    </ol>
+    <div class="demo" aria-hidden="true">
+      <span class="paste">붙여넣기<i>3</i></span>
+      <div class="chat">
+        <span class="plus">+</span>
+        <span class="ph">메시지 입력<span class="ring"></span><i>2</i></span>
+        <span class="send">↑<i>3</i></span>
+      </div>
+    </div>
+    <button id="go" type="button">복사하고 카카오톡 열기</button>
+    <button id="gclose" type="button">닫기</button>
+  </div>
+</div>
 
 <div id="toast" hidden></div>
 

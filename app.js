@@ -151,6 +151,7 @@ function openDetail(id) {
 
 function closeDetail() {
   current = null;
+  $('#guide').hidden = true;
   $('#detail').hidden = true;
   document.body.style.overflow = '';
 }
@@ -192,11 +193,25 @@ function toast(msg) {
   clearTimeout(toast.t);
   toast.t = setTimeout(() => { t.hidden = true; }, 2000);
 }
-$('#ask').onclick = async () => {
+// 문의 버튼 → 안내 화면 표시
+const askText = (p) => `[상품 문의] 상품번호 ${p.id}\n${location.origin}${location.pathname}#/${p.id}`;
+$('#ask').onclick = () => {
   if (!current) return;
-  await copyText(current.id);
-  toast(`상품번호 ${current.id} 복사됨 · 채팅창에 붙여넣기`);
-  setTimeout(() => { location.href = CONFIG.kakaoUrl; }, 1200);
+  const img = $('#gthumb');
+  img.onerror = () => fallback(img, current.id);
+  img.src = thumbUrl(current);
+  $('#gid').textContent = '상품번호 ' + current.id;
+  $('#gprice').textContent = priceText(current);
+  $('#guide').hidden = false;
+};
+$('#gclose').onclick = () => { $('#guide').hidden = true; };
+$('#guide').onclick = (e) => { if (e.target.id === 'guide') $('#guide').hidden = true; };
+// 노란 버튼: 문의 내용 복사 → 카카오톡 채널 이동
+$('#go').onclick = async () => {
+  if (!current) return;
+  await copyText(askText(current));
+  toast('문의 내용 복사됨');
+  setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
 
 // ===== 사진 보호: 우클릭·드래그 차단 =====
