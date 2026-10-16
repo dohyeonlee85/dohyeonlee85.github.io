@@ -1,0 +1,5 @@
+google-api-python-client==2.151.0
+google-auth==2.36.0
+boto3==1.35.60
+Pillow==11.0.0
+pillow-heif==0.20.0

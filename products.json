@@ -1,17 +1,5 @@
 {
 "base": "https://pub-69d6301482294b988aa91f25f9e5b56e.r2.dev",
 "items": [
-{"id": "261016-01", "date": "2026-10-16", "cat1": "clothes-women", "cat2": "top", "name": "", "price": 29000, "desc": "", "photos": 8},
-{"id": "261016-02", "date": "2026-10-16", "cat1": "clothes-women", "cat2": "outer", "name": "울 블렌드 코트", "price": 89000, "desc": "색상: 베이지, 그레이\n사이즈: FREE", "photos": 10},
-{"id": "261015-01", "date": "2026-10-15", "cat1": "clothes-men", "cat2": "bottom", "name": "", "price": 0, "desc": "", "photos": 6},
-{"id": "261015-02", "date": "2026-10-15", "cat1": "clothes-women", "cat2": "shoes", "name": "", "price": 45000, "desc": "", "photos": 5},
-{"id": "261014-01", "date": "2026-10-14", "cat1": "clothes-men", "cat2": "top", "name": "", "price": 32000, "desc": "", "photos": 7},
-{"id": "261009-01", "date": "2026-10-09", "cat1": "clothes-women", "cat2": "bottom", "name": "와이드 슬랙스", "price": 39000, "desc": "", "photos": 9},
-{"id": "261008-01", "date": "2026-10-08", "cat1": "clothes-men", "cat2": "outer", "name": "", "price": 0, "desc": "", "photos": 10},
-{"id": "261007-01", "date": "2026-10-07", "cat1": "clothes-women", "cat2": "etc", "name": "", "price": 15000, "desc": "", "photos": 3},
-{"id": "261006-01", "date": "2026-10-06", "cat1": "clothes-men", "cat2": "shoes", "name": "", "price": 59000, "desc": "", "photos": 6},
-{"id": "261002-01", "date": "2026-10-02", "cat1": "clothes-women", "cat2": "top", "name": "", "price": 25000, "desc": "", "photos": 4},
-{"id": "260930-01", "date": "2026-09-30", "cat1": "clothes-men", "cat2": "etc", "name": "", "price": 12000, "desc": "", "photos": 2},
-{"id": "260929-01", "date": "2026-09-29", "cat1": "clothes-women", "cat2": "outer", "name": "", "price": 0, "desc": "", "photos": 8}
 ]
 }
