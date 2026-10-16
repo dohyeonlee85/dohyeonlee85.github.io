@@ -116,9 +116,13 @@ def next_id(day, used):
 
 
 def main():
-    sheet_id = os.environ['SHEET_ID']
+    sheet_id = os.environ['SHEET_ID'].strip()
     sheets, drive = google_services()
     r2 = r2_client()
+    # 값 자체는 숨기고 길이만 표시 (정상: 32 / 64 / True)
+    print('키 점검: Access Key ID', len(os.environ['R2_ACCESS_KEY_ID'].strip()), '자리,',
+          'Secret', len(os.environ['R2_SECRET_ACCESS_KEY'].strip()), '자리,',
+          '버킷 이름 shop-images 일치', os.environ['R2_BUCKET'].strip() == 'shop-images')
 
     tab = sheets.spreadsheets().get(spreadsheetId=sheet_id).execute()['sheets'][0]['properties']['title']
     rows = sheets.spreadsheets().values().get(
