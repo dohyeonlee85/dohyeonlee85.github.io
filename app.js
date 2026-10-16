@@ -21,7 +21,8 @@ function fallback(img, label) {
   img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 
-const priceText = (p) => (p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '문의하기');
+// 가격 없으면 빈칸 (표시 생략)
+const priceText = (p) => (p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '');
 
 // ===== 주차 계산 (월요일 시작) =====
 function mondayOf(d) {
@@ -84,7 +85,7 @@ function renderMore() {
     a.className = 'card';
     a.href = '#/' + p.id;
     a.innerHTML = `<div class="thumb"><img loading="lazy" decoding="async" alt="" draggable="false"></div>
-      <div class="price${p.price ? '' : ' ask'}">${priceText(p)}</div>`;
+      <div class="price">${priceText(p)}</div>`;
     const img = a.querySelector('img');
     img.onerror = () => fallback(img, p.id);
     img.src = thumbUrl(p);
@@ -140,6 +141,7 @@ function openDetail(id) {
   $('#pname').textContent = p.name || '';
   $('#pname').hidden = !p.name;
   $('#pprice').textContent = priceText(p);
+  $('#pprice').hidden = !p.price;
   $('#pdesc').textContent = p.desc || '';
   $('#pdesc').hidden = !p.desc;
   $('#detail').hidden = false;

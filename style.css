@@ -12,7 +12,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  /* 세리프체: 기기 내장 글꼴 사용 (다운로드 없음 → 로딩 지연 없음) */
+  font-family: "Noto Serif KR", "Noto Serif CJK KR", "Nanum Myeongjo", "AppleMyungjo", "Batang", Georgia, serif;
   background: var(--bg);
   color: var(--text);
   -webkit-tap-highlight-color: transparent;
@@ -27,6 +28,7 @@ header {
 }
 .bar { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
 .logo { font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 1px; }
+input, button { font-family: inherit; }
 #search {
   flex: 1; min-width: 0; height: 34px; padding: 0 12px;
   border: 1px solid var(--dust-grey); border-radius: 17px;
@@ -54,8 +56,7 @@ header {
 .card { display: block; color: var(--text); text-decoration: none; }
 .thumb { aspect-ratio: 3 / 4; background: var(--powder-petal); overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.price { font-size: 12px; padding: 4px 4px 10px; }
-.price.ask { color: var(--text-sub); }
+.price { font-size: 12px; padding: 4px 4px 10px; min-height: 30px; }
 #more { height: 1px; }
 #empty { padding: 60px 0; text-align: center; color: var(--text-sub); font-size: 14px; }
 
