@@ -194,14 +194,12 @@ function toast(msg) {
   toast.t = setTimeout(() => { t.hidden = true; }, 2000);
 }
 // 문의 버튼 → 안내 화면 표시
-const askText = (p) => `[상품 문의] 상품번호 ${p.id}\n${location.origin}${location.pathname}#/${p.id}`;
+const askText = (p) => `이 상품을 문의합니다\n상품번호 ${p.id}\n${location.origin}${location.pathname}#/${p.id}`;
 $('#ask').onclick = () => {
   if (!current) return;
   const img = $('#gthumb');
   img.onerror = () => fallback(img, current.id);
   img.src = thumbUrl(current);
-  $('#gid').textContent = '상품번호 ' + current.id;
-  $('#gprice').textContent = priceText(current);
   $('#guide').hidden = false;
 };
 $('#gclose').onclick = () => { $('#guide').hidden = true; };
