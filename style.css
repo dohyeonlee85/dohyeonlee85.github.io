@@ -1,0 +1,119 @@
+/* 색상 (지정 팔레트) */
+:root {
+  --parchment: #edede9;
+  --dust-grey: #d6ccc2;
+  --linen: #f5ebe0;
+  --powder-petal: #e3d5ca;
+  --almond-silk: #d5bdaf;
+  --text: #3d3430;
+  --text-sub: #8a7d74;
+  --bg: #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+
+/* 상단 고정 영역 */
+header {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--linen);
+  border-bottom: 1px solid var(--dust-grey);
+}
+.bar { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+.logo { font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 1px; }
+#search {
+  flex: 1; min-width: 0; height: 34px; padding: 0 12px;
+  border: 1px solid var(--dust-grey); border-radius: 17px;
+  background: var(--bg); font-size: 14px; color: var(--text); outline: none;
+}
+#search:focus { border-color: var(--almond-silk); }
+
+.tabs { display: flex; gap: 6px; padding: 0 12px 8px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button {
+  flex: none; padding: 6px 12px; border-radius: 14px;
+  font-size: 13px; background: var(--bg); border: 1px solid var(--dust-grey);
+}
+.tabs button.on { background: var(--almond-silk); border-color: var(--almond-silk); font-weight: 600; }
+.tabs.sub button { font-size: 12px; padding: 4px 10px; background: transparent; }
+.tabs.sub button.on { background: var(--powder-petal); border-color: var(--powder-petal); }
+
+/* 주차별 그룹 + 3열 그리드 */
+.group h2 {
+  font-size: 14px; font-weight: 600; padding: 16px 12px 8px;
+  border-top: 6px solid var(--parchment);
+}
+.group:first-child h2 { border-top: 0; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 3px; }
+.card { display: block; color: var(--text); text-decoration: none; }
+.thumb { aspect-ratio: 3 / 4; background: var(--powder-petal); overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.price { font-size: 12px; padding: 4px 4px 10px; }
+.price.ask { color: var(--text-sub); }
+#more { height: 1px; }
+#empty { padding: 60px 0; text-align: center; color: var(--text-sub); font-size: 14px; }
+
+/* 넓은 화면(PC)은 열 수 증가 */
+@media (min-width: 700px) {
+  .grid { grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 0 12px; }
+  main, header, #detail { max-width: 1100px; margin: 0 auto; }
+}
+
+/* 상세 화면 */
+#detail {
+  position: fixed; inset: 0; z-index: 20;
+  background: var(--bg); overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+#detail[hidden] { display: none; }
+.dbar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; background: var(--linen); border-bottom: 1px solid var(--dust-grey);
+}
+#back { font-size: 22px; padding: 0 8px; }
+#count { font-size: 13px; color: var(--text-sub); }
+
+#slides {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; background: var(--parchment);
+}
+#slides::-webkit-scrollbar { display: none; }
+.slide {
+  flex: none; width: 100%; aspect-ratio: 3 / 4; max-height: 80vh;
+  scroll-snap-align: center; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.slide.zoom { overflow: auto; display: block; }
+.slide.zoom img { width: 250%; height: auto; max-width: none; object-fit: unset; }
+
+.info { padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 6px; }
+#pid { font-size: 12px; color: var(--text-sub); }
+#pname { font-size: 16px; font-weight: 600; }
+#pprice { font-size: 18px; font-weight: 700; }
+#pdesc { font-size: 14px; line-height: 1.6; white-space: pre-line; color: var(--text); }
+#ask {
+  margin: 12px 16px calc(20px + env(safe-area-inset-bottom));
+  padding: 14px; border-radius: 10px;
+  background: var(--text); color: var(--linen); font-size: 15px; font-weight: 600;
+}
+
+#toast {
+  position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 30;
+  padding: 10px 16px; border-radius: 20px;
+  background: rgba(61, 52, 48, .9); color: #fff; font-size: 13px;
+}
+
+/* 사진 보호: 길게 눌러 저장·드래그·선택 차단 */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-user-drag: none;
+}

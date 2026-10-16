@@ -1,1 +1,46 @@
-<h1>shop</h1>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>shop</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 상단 고정: 사이트명 + 검색 + 카테고리 2단 탭 -->
+<header id="top">
+  <div class="bar">
+    <a class="logo" href="#">shop</a>
+    <input id="search" type="search" placeholder="search" autocomplete="off">
+  </div>
+  <nav id="cat1" class="tabs"></nav>
+  <nav id="cat2" class="tabs sub"></nav>
+</header>
+
+<!-- 상품 목록 (주차별 그룹) -->
+<main id="list"></main>
+<div id="more"></div>
+<p id="empty" hidden>상품 없음</p>
+
+<!-- 상세 화면 -->
+<section id="detail" hidden>
+  <div class="dbar">
+    <button id="back" type="button" aria-label="back">←</button>
+    <span id="count"></span>
+  </div>
+  <div id="slides"></div>
+  <div class="info">
+    <p id="pid"></p>
+    <p id="pname"></p>
+    <p id="pprice"></p>
+    <p id="pdesc"></p>
+  </div>
+  <button id="ask" type="button">카카오톡 문의하기</button>
+</section>
+
+<div id="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
