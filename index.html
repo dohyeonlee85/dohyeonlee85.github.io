@@ -18,7 +18,7 @@
 <header id="top">
   <div class="bar">
     <a class="logo" href="#">shop</a>
-    <input id="search" type="search" placeholder="search" autocomplete="off">
+    <input id="search" type="search" placeholder="search" autocomplete="off" hidden>
   </div>
   <nav id="cat1" class="tabs"></nav>
   <nav id="cat2" class="tabs sub"></nav>
@@ -35,7 +35,11 @@
     <button id="back" type="button" aria-label="back">←</button>
     <span id="count"></span>
   </div>
-  <div id="slides"></div>
+  <div class="gallery">
+    <div id="slides"></div>
+    <button id="prev" class="nav" type="button" aria-label="prev">‹</button>
+    <button id="next" class="nav" type="button" aria-label="next">›</button>
+  </div>
   <div class="info">
     <p id="pid"></p>
     <p id="pname"></p>

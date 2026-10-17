@@ -132,11 +132,13 @@ function openDetail(id) {
     box.appendChild(s);
   }
   box.scrollLeft = 0;
-  $('#count').textContent = `1 / ${total}`;
-  box.onscroll = () => {
-    const i = Math.round(box.scrollLeft / box.clientWidth) + 1;
+  const nav = (i) => {
     $('#count').textContent = `${i} / ${total}`;
+    $('#prev').hidden = i <= 1;
+    $('#next').hidden = i >= total;
   };
+  nav(1);
+  box.onscroll = () => nav(Math.round(box.scrollLeft / box.clientWidth) + 1);
   $('#pid').textContent = 'No. ' + p.id;
   $('#pname').textContent = p.name || '';
   $('#pname').hidden = !p.name;
@@ -158,6 +160,10 @@ function closeDetail() {
 
 let fromList = false;
 document.addEventListener('click', (e) => { if (e.target.closest('.card')) fromList = true; });
+// 사진 좌우 이동 버튼
+const slideBy = (d) => $('#slides').scrollBy({ left: d * $('#slides').clientWidth, behavior: 'smooth' });
+$('#prev').onclick = () => slideBy(-1);
+$('#next').onclick = () => slideBy(1);
 $('#back').onclick = () => {
   if (fromList) history.back();
   else location.hash = '';
@@ -226,6 +232,8 @@ fetch(CONFIG.dataUrl, { cache: 'no-cache' })
     state.items = (data.items || [])
       .map((p) => ({ ...p, _week: weekAgo(p.date) }))
       .sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+    // 상품명 있는 상품이 하나라도 있을 때만 검색창 표시
+    $('#search').hidden = !state.items.some((p) => p.name);
     applyFilter();
     route();
   })
