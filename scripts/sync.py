@@ -115,7 +115,16 @@ def next_id(day, used):
     return f'{prefix}-{n:02d}'
 
 
+def save_json(data):
+    data['items'].sort(key=lambda p: p['id'], reverse=True)
+    with open(JSON_PATH, 'w', encoding='utf-8') as f:
+        f.write('{\n"base": ' + json.dumps(data['base']) + ',\n"items": [\n')
+        f.write(',\n'.join(json.dumps(p, ensure_ascii=False) for p in data['items']))
+        f.write('\n]\n}\n')
+
+
 def main():
+    import upload   # 사진 일괄 업로드 (scripts/upload.py)
     sheet_id = os.environ['SHEET_ID'].strip()
     sheets, drive = google_services()
     r2 = r2_client()
@@ -144,6 +153,7 @@ def main():
     with open(JSON_PATH, encoding='utf-8') as f:
         data = json.load(f)
     used = {p['id'] for p in data['items']}
+    used |= upload.tab_ids(sheets, sheet_id)   # 분류 대기 중인 번호도 중복 방지
 
     def get(row, name):
         i = col.get(name)
@@ -185,11 +195,9 @@ def main():
         added += 1
         print(f'{r}행 → {pid} (사진 {len(ids)}장)')
 
-    data['items'].sort(key=lambda p: p['id'], reverse=True)
-    with open(JSON_PATH, 'w', encoding='utf-8') as f:
-        f.write('{\n"base": ' + json.dumps(data['base']) + ',\n"items": [\n')
-        f.write(',\n'.join(json.dumps(p, ensure_ascii=False) for p in data['items']))
-        f.write('\n]\n}\n')
+    u_added, u_failed = upload.run(sheets, drive, r2, sheet_id, data, used)
+    added, failed = added + u_added, failed + u_failed
+    save_json(data)
 
     print(f'완료: 추가 {added}, 실패 {failed}')
     if failed:
