@@ -5,10 +5,12 @@ const CONFIG = {
   cat1: ['all', 'clothes-women', 'clothes-men'],
   cat2: ['all', 'top', 'bottom', 'outer', 'shoes', 'etc'],
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
+  newCount: 18, // 신상 가로줄 상품 수
+  newPool: 50,  // 신상 후보: 최근 등록 50개 중 무작위 선택
 };
 
 const $ = (s) => document.querySelector(s);
-const state = { base: '', items: [], view: [], shown: 0, cat1: 'all', cat2: 'all', q: '', lastWeek: null, grid: null };
+const state = { base: '', items: [], view: [], shown: 0, cat1: 'all', cat2: 'all', q: '', sort: 'new' };
 
 // ===== 사진 주소 규칙: {base}/{상품번호}/thumb.webp, 1.webp ~ N.webp =====
 const ver = (p) => (p.v ? `?v=${p.v}` : '');   // 대표 사진 교체 시 새 사진 받아오기
@@ -24,19 +26,6 @@ function fallback(img, label) {
 
 // 가격 없으면 빈칸 (표시 생략)
 const priceText = (p) => (p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '');
-
-// ===== 주차 계산 (월요일 시작) =====
-function mondayOf(d) {
-  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
-  return x;
-}
-const THIS_MONDAY = mondayOf(new Date());
-function weekAgo(dateStr) {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return Math.max(0, Math.round((THIS_MONDAY - mondayOf(new Date(y, m - 1, d))) / 604800000));
-}
-const weekLabel = (n) => (n === 0 ? '이번 주 신상' : n === 1 ? '지난주' : `${n}주 전`);
 
 // ===== 탭 =====
 function makeTabs(el, list, key) {
@@ -56,44 +45,71 @@ function makeTabs(el, list, key) {
 }
 
 // ===== 목록 =====
+let filtered = [];   // 필터 결과 (최신순)
+// 무작위 섞기
+function shuffle(list) {
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
 function applyFilter() {
   const q = state.q.trim().toLowerCase();
-  state.view = state.items.filter((p) =>
+  filtered = state.items.filter((p) =>
     (state.cat1 === 'all' || p.cat1 === state.cat1) &&
     (state.cat2 === 'all' || p.cat2 === state.cat2) &&
     (!q || [p.id, p.name, p.desc].join(' ').toLowerCase().includes(q))
   );
-  $('#list').innerHTML = '';
+  // 신상 가로줄: 최근 등록 50개 중 무작위 18개, 접속할 때마다 바뀜 (검색 중엔 숨김)
+  const row = $('#newrow');
+  row.innerHTML = '';
+  if (!q) shuffle(filtered.slice(0, CONFIG.newPool)).slice(0, CONFIG.newCount).forEach((p) => row.appendChild(makeCard(p)));
+  row.scrollLeft = 0;
+  $('#newbox').hidden = !row.children.length;
+  renderGrid();
+  window.scrollTo(0, 0);
+}
+
+// 정렬기준 적용 후 전체 목록 다시 그림 (가격 없는 상품은 가격순에서 맨 뒤)
+function renderGrid() {
+  const s = state.sort;
+  state.view = s === 'old' ? [...filtered].reverse()
+    : s === 'low' || s === 'high' ? [...filtered].sort((a, b) =>
+        (!a.price) - (!b.price) || (s === 'low' ? 1 : -1) * (a.price - b.price))
+    : filtered;
+  $('#grid').innerHTML = '';
   state.shown = 0;
-  state.lastWeek = null;
   $('#empty').hidden = state.view.length > 0;
   renderMore();
-  window.scrollTo(0, 0);
+}
+
+function makeCard(p) {
+  const a = document.createElement('a');
+  a.className = 'card';
+  a.href = '#/' + p.id;
+  a.innerHTML = `<div class="thumb"><img loading="lazy" decoding="async" alt="" draggable="false"></div>`
+    + (p.price ? `<div class="price">${priceText(p)}</div>` : '');
+  const img = a.querySelector('img');
+  img.onerror = () => fallback(img, p.id);
+  img.src = thumbUrl(p);
+  return a;
 }
 
 function renderMore() {
   const next = state.view.slice(state.shown, state.shown + CONFIG.pageSize);
-  next.forEach((p) => {
-    if (p._week !== state.lastWeek) {
-      state.lastWeek = p._week;
-      const g = document.createElement('section');
-      g.className = 'group';
-      g.innerHTML = `<h2>${weekLabel(p._week)}</h2><div class="grid"></div>`;
-      $('#list').appendChild(g);
-      state.grid = g.querySelector('.grid');
-    }
-    const a = document.createElement('a');
-    a.className = 'card';
-    a.href = '#/' + p.id;
-    a.innerHTML = `<div class="thumb"><img loading="lazy" decoding="async" alt="" draggable="false"></div>
-      <div class="price">${priceText(p)}</div>`;
-    const img = a.querySelector('img');
-    img.onerror = () => fallback(img, p.id);
-    img.src = thumbUrl(p);
-    state.grid.appendChild(a);
-  });
+  next.forEach((p) => $('#grid').appendChild(makeCard(p)));
   state.shown += next.length;
 }
+
+$('#sort').onchange = (e) => { state.sort = e.target.value; renderGrid(); };
+
+// 맨 아래 도착 시에만 TOP 버튼 표시 (위로 올라가면 다시 숨김)
+window.addEventListener('scroll', () => {
+  const end = scrollY > 300 && innerHeight + scrollY >= document.documentElement.scrollHeight - 80;
+  $('#totop').hidden = !end;
+}, { passive: true });
+$('#totop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
 // 아래로 스크롤하면 다음 상품 추가 (지연 로딩)
 new IntersectionObserver((e) => {
@@ -107,37 +123,45 @@ $('#search').addEventListener('input', (e) => {
 });
 
 // ===== 상세 화면 =====
-let current = null;
+let current = null, slideNo = 1;
 function openDetail(id) {
   const p = state.items.find((x) => x.id === id);
   if (!p) { closeDetail(); return; }
   current = p;
   const total = Math.max(1, Number(p.photos) || 1);
+  const loop = total > 1;
+  // 끝없이 넘기기: [마지막 사진 복제, 1 ~ N, 첫 사진 복제]
+  const order = loop ? [total, ...Array.from({ length: total }, (_, i) => i + 1), 1] : [1];
   const box = $('#slides');
   box.innerHTML = '';
-  for (let n = 1; n <= total; n++) {
+  order.forEach((n, i) => {
     const s = document.createElement('div');
     s.className = 'slide';
     const img = document.createElement('img');
     img.alt = '';
     img.draggable = false;
-    if (n > 1) img.loading = 'lazy';
+    if (i !== (loop ? 1 : 0)) img.loading = 'lazy';
     img.onerror = () => fallback(img, `${p.id} (${n})`);
     img.src = photoUrl(p, n);
     s.appendChild(img);
-   
-      
-      
     box.appendChild(s);
-  }
-  box.scrollLeft = 0;
-  const nav = (i) => {
-    $('#count').textContent = `${i} / ${total}`;
-    $('#prev').hidden = i <= 1;
-    $('#next').hidden = i >= total;
+  });
+  const show = (n) => { slideNo = n; $('#count').textContent = `${n} / ${total}`; };
+  show(1);
+  $('#count').hidden = $('#prev').hidden = $('#next').hidden = !loop;
+  let t;
+  box.onscroll = () => {
+    const pos = Math.round(box.scrollLeft / box.clientWidth);
+    show(loop ? ((pos - 1 + total) % total) + 1 : 1);
+    // 복제 사진에 멈추면 같은 진짜 사진 위치로 순간 이동
+    clearTimeout(t);
+    t = setTimeout(() => {
+      if (!loop) return;
+      const w = box.clientWidth, at = Math.round(box.scrollLeft / w);
+      if (at === 0) box.scrollLeft = total * w;
+      else if (at === total + 1) box.scrollLeft = w;
+    }, 150);
   };
-  nav(1);
-  box.onscroll = () => nav(Math.round(box.scrollLeft / box.clientWidth) + 1);
   $('#pid').textContent = 'No. ' + p.id;
   $('#pname').textContent = p.name || '';
   $('#pname').hidden = !p.name;
@@ -147,6 +171,7 @@ function openDetail(id) {
   $('#pdesc').hidden = !p.desc;
   $('#detail').hidden = false;
   $('#detail').scrollTop = 0;
+  box.scrollLeft = loop ? box.clientWidth : 0;   // 화면 표시 후 1번 사진 위치로
   document.body.style.overflow = 'hidden';
 }
 
@@ -274,8 +299,7 @@ vw.addEventListener('wheel', (e) => {
 
 function openViewer() {
   if (!current) return;
-  const box = $('#slides');
-  vimg.src = photoUrl(current, Math.round(box.scrollLeft / box.clientWidth) + 1);
+  vimg.src = photoUrl(current, slideNo);
   zs.s = 1; zs.x = 0; zs.y = 0;
   applyZoom();
   vw.hidden = false;
@@ -296,9 +320,6 @@ document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && ['s', 'u', 'p'].includes(e.key.toLowerCase())) e.preventDefault();
 });
 
-
-
-
 // ===== 시작 =====
 makeTabs($('#cat1'), CONFIG.cat1, 'cat1');
 makeTabs($('#cat2'), CONFIG.cat2, 'cat2');
@@ -307,10 +328,11 @@ fetch(CONFIG.dataUrl, { cache: 'no-cache' })
   .then((data) => {
     state.base = (data.base || '').replace(/\/$/, '');
     state.items = (data.items || [])
-      .map((p) => ({ ...p, _week: weekAgo(p.date) }))
       .sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
     // 상품명 있는 상품이 하나라도 있을 때만 검색창 표시
     $('#search').hidden = !state.items.some((p) => p.name);
+    // 가격 있는 상품이 없으면 가격순 정렬 숨김
+    if (!state.items.some((p) => p.price)) $('#sort').querySelectorAll('[value=low],[value=high]').forEach((o) => o.remove());
     applyFilter();
     route();
   })

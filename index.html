@@ -24,16 +24,33 @@
   <nav id="cat2" class="tabs sub"></nav>
 </header>
 
-<!-- 상품 목록 (주차별 그룹) -->
-<main id="list"></main>
+<!-- 상품 목록: 신상 가로줄 + 전체 (정렬) -->
+<main id="list">
+  <section id="newbox" class="sec" hidden>
+    <h2>이번 주 신상</h2>
+    <div id="newrow" class="row"></div>
+  </section>
+  <section class="sec">
+    <div class="sechead">
+      <h2>전체</h2>
+      <select id="sort" aria-label="정렬기준">
+        <option value="new">최신순</option>
+        <option value="old">오래된순</option>
+        <option value="low">낮은 가격순</option>
+        <option value="high">높은 가격순</option>
+      </select>
+    </div>
+    <div id="grid" class="grid"></div>
+  </section>
+</main>
 <div id="more"></div>
 <p id="empty" hidden>상품 없음</p>
+<button id="totop" type="button" hidden>TOP</button>
 
 <!-- 상세 화면 -->
 <section id="detail" hidden>
   <div class="dbar">
     <button id="back" type="button" aria-label="back">←</button>
-    <span id="count"></span>
   </div>
   <div class="gallery">
     <div id="slides"></div>
@@ -42,6 +59,7 @@
     <button id="zoom" type="button" aria-label="zoom">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20M10.5 7.5v6M7.5 10.5h6"/></svg>
     </button>
+    <span id="count"></span>
   </div>
   <div class="info">
     <p id="pid"></p>
@@ -49,7 +67,7 @@
     <p id="pprice"></p>
     <p id="pdesc"></p>
   </div>
-  <button id="ask" type="button">카카오톡 문의하기</button>
+  <div class="askbar"><button id="ask" type="button">카카오톡 문의하기</button></div>
 </section>
 
 <!-- 카카오톡 문의 안내 -->

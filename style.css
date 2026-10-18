@@ -46,23 +46,38 @@ input, button { font-family: inherit; }
 .tabs.sub button { font-size: 12px; padding: 4px 10px; background: transparent; }
 .tabs.sub button.on { background: var(--powder-petal); border-color: var(--powder-petal); }
 
-/* 주차별 그룹 + 3열 그리드 */
-.group h2 {
-  font-size: 14px; font-weight: 600; padding: 16px 12px 8px;
-  border-top: 6px solid var(--parchment);
+/* 신상 가로줄 + 전체 3열 그리드 */
+#list { padding-bottom: 60px; }   /* 맨 아래 TOP 버튼 자리 */
+.sec h2 { font-size: 14px; font-weight: 600; padding: 16px 12px 8px; }
+.sechead { display: flex; justify-content: space-between; align-items: center; padding-right: 12px; }
+#sort {
+  font-size: 13px; color: var(--text); background: var(--bg);
+  border: 1px solid var(--dust-grey); border-radius: 14px; padding: 4px 8px; outline: none;
 }
-.group:first-child h2 { border-top: 0; }
+.row {
+  display: flex; gap: 3px; padding: 0 3px; overflow-x: auto;
+  scroll-snap-type: x proximity; scrollbar-width: none;
+}
+.row::-webkit-scrollbar { display: none; }
+.row .card { flex: none; width: calc((100% - 12px) / 4.5); scroll-snap-align: start; }   /* 화면에 4.5장 */
+#totop {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 15;
+  padding: 8px 18px; border-radius: 18px; letter-spacing: 1px;
+  background: rgba(61, 52, 48, .85); color: #fff; font-size: 13px;
+}
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 3px; }
 .card { display: block; color: var(--text); text-decoration: none; }
 .thumb { aspect-ratio: 3 / 4; background: var(--powder-petal); overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.price { font-size: 12px; padding: 4px 4px 10px; min-height: 30px; }
+.price { font-size: 12px; padding: 4px 4px 10px; }
 #more { height: 1px; }
 #empty { padding: 60px 0; text-align: center; color: var(--text-sub); font-size: 14px; }
 
 /* 넓은 화면(PC)은 열 수 증가 */
 @media (min-width: 700px) {
   .grid { grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 0 12px; }
+  .row { gap: 6px; padding: 0 12px; }
+  .row .card { width: calc((100% - 36px) / 6.5); }
   main, header, #detail { max-width: 1100px; margin: 0 auto; }
 }
 
@@ -79,7 +94,12 @@ input, button { font-family: inherit; }
   padding: 8px 12px; background: var(--linen); border-bottom: 1px solid var(--dust-grey);
 }
 #back { font-size: 22px; padding: 0 8px; }
-#count { font-size: 13px; color: var(--text-sub); }
+#count {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 1;
+  padding: 3px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, .75); font-size: 12px; color: var(--text);
+}
+#count[hidden] { display: none; }
 
 #slides {
   display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
@@ -133,8 +153,13 @@ input, button { font-family: inherit; }
 #pname { font-size: 16px; font-weight: 600; }
 #pprice { font-size: 18px; font-weight: 700; }
 #pdesc { font-size: 14px; line-height: 1.6; white-space: pre-line; color: var(--text); }
+.askbar {   /* 문의 버튼 화면 하단 고정 */
+  position: sticky; bottom: 0; margin-top: auto; z-index: 2;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--bg); border-top: 1px solid var(--parchment);
+}
 #ask {
-  margin: 12px 16px calc(20px + env(safe-area-inset-bottom));
+  display: block; width: 100%;
   padding: 14px; border-radius: 10px;
   background: var(--text); color: var(--linen); font-size: 15px; font-weight: 600;
 }
