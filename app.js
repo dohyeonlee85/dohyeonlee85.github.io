@@ -11,8 +11,9 @@ const $ = (s) => document.querySelector(s);
 const state = { base: '', items: [], view: [], shown: 0, cat1: 'all', cat2: 'all', q: '', lastWeek: null, grid: null };
 
 // ===== 사진 주소 규칙: {base}/{상품번호}/thumb.webp, 1.webp ~ N.webp =====
-const thumbUrl = (p) => `${state.base}/${p.id}/thumb.webp`;
-const photoUrl = (p, n) => `${state.base}/${p.id}/${n}.webp`;
+const ver = (p) => (p.v ? `?v=${p.v}` : '');   // 대표 사진 교체 시 새 사진 받아오기
+const thumbUrl = (p) => `${state.base}/${p.id}/thumb.webp${ver(p)}`;
+const photoUrl = (p, n) => `${state.base}/${p.id}/${n}.webp${ver(p)}`;
 
 // 사진이 없을 때 대체 이미지
 function fallback(img, label) {
