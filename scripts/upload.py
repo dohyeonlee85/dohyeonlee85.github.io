@@ -46,7 +46,7 @@ def thread_drive():
 
 
 def ensure_tab(sheets, sid):
-    tabs = {s['properties']['title']: s['properties']['sheetId'] for s in
+    tabs = {s['properties']['title']: s['properties'] for s in
             sheets.spreadsheets().get(spreadsheetId=sid).execute()['sheets']}
     if UPLOAD_TAB in tabs:
         # 나중에 추가된 열(대표·버전 등)은 맨 오른쪽에 이어 붙임
@@ -55,6 +55,12 @@ def ensure_tab(sheets, sid):
         header = [str(h).strip() for h in (first[0] if first else [])]
         missing = [h for h in HEADER if h not in header]
         if missing:
+            props = tabs[UPLOAD_TAB]
+            short = len(header) + len(missing) - props['gridProperties']['columnCount']
+            if short > 0:   # 시트 칸 수가 모자라면 먼저 늘림
+                sheets.spreadsheets().batchUpdate(spreadsheetId=sid, body={'requests': [
+                    {'appendDimension': {'sheetId': props['sheetId'], 'dimension': 'COLUMNS',
+                                         'length': short}}]}).execute()
             sheets.spreadsheets().values().update(
                 spreadsheetId=sid, range=f"'{UPLOAD_TAB}'!{col_letter(len(header) + 1)}1",
                 valueInputOption='RAW', body={'values': [missing]}).execute()
