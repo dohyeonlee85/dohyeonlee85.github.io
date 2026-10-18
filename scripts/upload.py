@@ -2,7 +2,7 @@
 
 묶기: 사진 파일 이름 = 저장 시각(1000분의 1초). 앞 사진과 GAP_MS 이상 벌어지면 다음 상품.
 공개: '분류'를 고른 줄만 products.json에 반영. 분류를 지우면 사이트에서 내림.
-대표: '대표' 칸에 사진 번호 입력 → 그 사진을 1번·썸네일로 교체 후 칸 비움.
+대표: '대표' 칸에 사진 번호 → 그 사진을 1번·썸네일로, '역순' → 전체 순서 뒤집기. 처리 후 칸 비움.
 정리: 업로드 후 KEEP_UNSORTED_DAYS일 지나도 분류 없는 줄 → 줄·R2 사진 삭제.
 처리한 사진은 '파일' 열에 기록 (Apps Script가 '완료' 폴더로 옮김).
 """
@@ -210,17 +210,30 @@ def bucket():
     return os.environ['R2_BUCKET'].strip()
 
 
+def new_thumb(r2, pid, detail):
+    img = Image.open(io.BytesIO(detail)).convert('RGB')
+    img.thumbnail((THUMB_WIDTH, THUMB_WIDTH * 4), Image.LANCZOS)
+    put(r2, f'{pid}/thumb.webp', webp(img, THUMB_QUALITY))
+
+
 def set_cover(r2, pid, n):
     """n번 사진을 1번 자리로 (서로 맞바꿈) + 썸네일 새로 만들기."""
     first, chosen = r2_get(r2, f'{pid}/1.webp'), r2_get(r2, f'{pid}/{n}.webp')
     put(r2, f'{pid}/1.webp', chosen)
     put(r2, f'{pid}/{n}.webp', first)
-    img = Image.open(io.BytesIO(chosen)).convert('RGB')
-    img.thumbnail((THUMB_WIDTH, THUMB_WIDTH * 4), Image.LANCZOS)
-    put(r2, f'{pid}/thumb.webp', webp(img, THUMB_QUALITY))
+    new_thumb(r2, pid, chosen)
+
+
+def reverse_photos(r2, pid, photos):
+    """사진 순서 전체 뒤집기 (마지막 사진 → 1번) + 썸네일 새로 만들기."""
+    imgs = [r2_get(r2, f'{pid}/{k}.webp') for k in range(1, photos + 1)]
+    for k, data in enumerate(reversed(imgs), start=1):
+        put(r2, f'{pid}/{k}.webp', data)
+    new_thumb(r2, pid, imgs[-1])
 
 
 def apply_covers(sheets, r2, sid, base):
+    """대표 칸: 숫자 = 그 사진을 1번·썸네일로, '역순' = 전체 순서 뒤집기. 처리 후 칸 비움."""
     header, rows, get = read_tab(sheets, sid)
     updates = []
     for n, r in rows:
@@ -229,19 +242,25 @@ def apply_covers(sheets, r2, sid, base):
             continue
         pid, photos = get(r, ID_HEADER), int(float(get(r, '사진수') or 0))
         num = int(float(want)) if re.fullmatch(r'\d+(\.0)?', want) else 0
-        if 2 <= num <= photos:
-            try:
-                set_cover(r2, pid, num)
-            except Exception as e:  # 다음 실행 때 다시 시도 (칸 유지)
-                print(f'{pid} 대표 교체 실패: {e}')
-                continue
-            v = int(float(get(r, '버전') or 0)) + 1
-            updates += [{'range': cell(header, '버전', n), 'values': [[v]]},
-                        {'range': cell(header, '썸네일', n), 'values': [[thumb_formula(base, pid, v)]]}]
-            print(f'{pid} 대표 → {num}번 사진')
-        elif num != 1:
-            print(f'{pid} 대표 번호 확인 필요: {want} (1~{photos})')
-        updates.append({'range': cell(header, '대표', n), 'values': [['']]})
+        if want == '역순' and photos >= 2:
+            job, done = (lambda: reverse_photos(r2, pid, photos)), '전체 역순'
+        elif 2 <= num <= photos:
+            job, done = (lambda: set_cover(r2, pid, num)), f'대표 → {num}번 사진'
+        else:
+            if num != 1:
+                print(f'{pid} 대표 칸 확인 필요: {want} (1~{photos} 또는 역순)')
+            updates.append({'range': cell(header, '대표', n), 'values': [['']]})
+            continue
+        try:
+            job()
+        except Exception as e:  # 다음 실행 때 다시 시도 (칸 유지)
+            print(f'{pid} 사진 순서 변경 실패: {e}')
+            continue
+        v = int(float(get(r, '버전') or 0)) + 1
+        updates += [{'range': cell(header, '버전', n), 'values': [[v]]},
+                    {'range': cell(header, '썸네일', n), 'values': [[thumb_formula(base, pid, v)]]},
+                    {'range': cell(header, '대표', n), 'values': [['']]}]
+        print(f'{pid} {done}')
     if updates:
         sheets.spreadsheets().values().batchUpdate(spreadsheetId=sid, body={
             'valueInputOption': 'USER_ENTERED', 'data': updates}).execute()
