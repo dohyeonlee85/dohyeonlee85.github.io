@@ -125,11 +125,9 @@ function openDetail(id) {
     img.onerror = () => fallback(img, `${p.id} (${n})`);
     img.src = photoUrl(p, n);
     s.appendChild(img);
-    // 사진 누르면 확대 / 다시 누르면 원래대로
-    s.onclick = () => {
-      const on = s.classList.toggle('zoom');
-      if (on) { s.scrollLeft = (s.scrollWidth - s.clientWidth) / 2; s.scrollTop = (s.scrollHeight - s.clientHeight) / 2; }
-    };
+   
+      
+      
     box.appendChild(s);
   }
   box.scrollLeft = 0;
@@ -219,9 +217,87 @@ $('#go').onclick = async () => {
   setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
 
-// ===== 사진 보호: 우클릭·드래그 차단 =====
-document.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-document.addEventListener('dragstart', (e) => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+// ===== 확대 보기: 확대 버튼 → 두 손가락(PC는 휠·드래그)으로 확대·이동 → 닫기 =====
+const vw = $('#viewer'), vimg = $('#vimg');
+const zs = { s: 1, x: 0, y: 0 };
+const pts = new Map();
+let pinch = null, drag = null, lastTap = 0;
+const applyZoom = () => { vimg.style.transform = `translate(${zs.x}px, ${zs.y}px) scale(${zs.s})`; };
+// (cx, cy) 지점을 기준으로 배율 변경 (1~5배)
+function zoomAt(cx, cy, ns) {
+  ns = Math.min(5, Math.max(1, ns));
+  const r = vw.getBoundingClientRect();
+  const ox = cx - r.left - r.width / 2, oy = cy - r.top - r.height / 2;
+  zs.x = ns === 1 ? 0 : ox - (ox - zs.x) * ns / zs.s;
+  zs.y = ns === 1 ? 0 : oy - (oy - zs.y) * ns / zs.s;
+  zs.s = ns;
+  applyZoom();
+}
+vw.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('button')) return;
+  vw.setPointerCapture(e.pointerId);
+  pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()];
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: zs.s };
+  } else if (pts.size === 1) {
+    drag = { x: e.clientX - zs.x, y: e.clientY - zs.y };
+    const now = Date.now();   // 두 번 톡톡 → 2.5배 / 원래대로
+    if (now - lastTap < 300) zoomAt(e.clientX, e.clientY, zs.s > 1 ? 1 : 2.5);
+    lastTap = now;
+  }
+});
+vw.addEventListener('pointermove', (e) => {
+  if (!pts.has(e.pointerId)) return;
+  pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pts.size === 2 && pinch) {
+    const [a, b] = [...pts.values()];
+    zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, pinch.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d);
+  } else if (pts.size === 1 && drag && zs.s > 1) {
+    zs.x = e.clientX - drag.x;
+    zs.y = e.clientY - drag.y;
+    applyZoom();
+  }
+});
+const lift = (e) => {
+  pts.delete(e.pointerId);
+  if (pts.size < 2) pinch = null;
+  const rest = [...pts.values()][0];
+  drag = rest ? { x: rest.x - zs.x, y: rest.y - zs.y } : null;
+};
+vw.addEventListener('pointerup', lift);
+vw.addEventListener('pointercancel', lift);
+vw.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoomAt(e.clientX, e.clientY, zs.s * (e.deltaY < 0 ? 1.2 : 1 / 1.2));
+}, { passive: false });
+
+function openViewer() {
+  if (!current) return;
+  const box = $('#slides');
+  vimg.src = photoUrl(current, Math.round(box.scrollLeft / box.clientWidth) + 1);
+  zs.s = 1; zs.x = 0; zs.y = 0;
+  applyZoom();
+  vw.hidden = false;
+  history.pushState({ viewer: 1 }, '');   // 휴대폰 뒤로가기 = 닫기
+}
+$('#zoom').onclick = openViewer;
+$('#vclose').onclick = () => history.back();
+window.addEventListener('popstate', () => {
+  if (vw.hidden) return;
+  vw.hidden = true;
+  vimg.removeAttribute('src');
+});
+
+// ===== 사진 보호: 우클릭·길게 누르기 메뉴, 드래그, 저장 단축키(Ctrl+S·U·P) 차단 =====
+document.addEventListener('contextmenu', (e) => { if (!e.target.closest('input')) e.preventDefault(); });
+document.addEventListener('dragstart', (e) => e.preventDefault());
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && ['s', 'u', 'p'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+
+
+
 
 // ===== 시작 =====
 makeTabs($('#cat1'), CONFIG.cat1, 'cat1');

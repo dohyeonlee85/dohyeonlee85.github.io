@@ -39,6 +39,9 @@
     <div id="slides"></div>
     <button id="prev" class="nav" type="button" aria-label="prev">‹</button>
     <button id="next" class="nav" type="button" aria-label="next">›</button>
+    <button id="zoom" type="button" aria-label="zoom">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20M10.5 7.5v6M7.5 10.5h6"/></svg>
+    </button>
   </div>
   <div class="info">
     <p id="pid"></p>
@@ -64,6 +67,13 @@
     <button id="go" type="button">문의하기</button>
     <button id="gclose" type="button">닫기</button>
   </div>
+</div>
+
+<!-- 확대 보기 (두 손가락으로 확대, PC는 마우스 휠) -->
+<div id="viewer" hidden>
+  <img id="vimg" alt="" draggable="false">
+  <button id="vclose" type="button">닫기</button>
+  <p class="vhint">두 손가락으로 확대 · 두 번 톡톡</p>
 </div>
 
 <div id="toast" hidden></div>

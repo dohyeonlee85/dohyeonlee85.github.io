@@ -103,8 +103,30 @@ input, button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
 }
 .slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.slide.zoom { overflow: auto; display: block; }
-.slide.zoom img { width: 250%; height: auto; max-width: none; object-fit: unset; }
+#zoom {
+  position: absolute; top: 8px; right: 8px; z-index: 1;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255, 255, 255, .75); color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 확대 보기 */
+#viewer {
+  position: fixed; inset: 0; z-index: 40; background: #111;
+  touch-action: none; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+#viewer[hidden] { display: none; }
+#vimg { max-width: 100%; max-height: 100%; transform-origin: center; will-change: transform; }
+#vclose {
+  position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 10px; z-index: 1;
+  padding: 8px 16px; border-radius: 18px;
+  background: rgba(255, 255, 255, .9); color: #191919; font-size: 14px; font-weight: 600;
+}
+.vhint {
+  position: absolute; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom));
+  text-align: center; font-size: 12px; color: rgba(255, 255, 255, .6); pointer-events: none;
+}
 
 .info { padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 6px; }
 #pid { font-size: 12px; color: var(--text-sub); }
@@ -161,4 +183,5 @@ img {
   -webkit-touch-callout: none;
   -webkit-user-select: none; user-select: none;
   -webkit-user-drag: none;
+  pointer-events: none;   /* 사진 자체를 누를 수 없게 → 길게 누르기·우클릭 '이미지 저장' 메뉴 자체가 안 뜸 */
 }
