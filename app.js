@@ -127,7 +127,7 @@ let current = null, slideNo = 1;
 function openDetail(id) {
   const p = state.items.find((x) => x.id === id);
   if (!p) { closeDetail(); return; }
-  current = p;
+  current = p;   if (window.gtag) gtag('event', 'view_item', { item_id: p.id, item_name: p.name || p.id });
   const total = Math.max(1, Number(p.photos) || 1);
   const loop = total > 1;
   // 끝없이 넘기기: [마지막 사진 복제, 1 ~ N, 첫 사진 복제]
@@ -237,7 +237,7 @@ $('#guide').onclick = (e) => { if (e.target.id === 'guide') $('#guide').hidden =
 // 노란 버튼: 문의 내용 복사 → 카카오톡 채널 이동
 $('#go').onclick = async () => {
   if (!current) return;
-  await copyText(askText(current));
+  if (window.gtag) gtag('event', 'ask_click', { item_id: current.id });   await copyText(askText(current));
   toast('문의 내용 복사됨');
   setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
