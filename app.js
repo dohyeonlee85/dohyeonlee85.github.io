@@ -239,24 +239,103 @@ function toast(msg) {
   clearTimeout(toast.t);
   toast.t = setTimeout(() => { t.hidden = true; }, 2000);
 }
-// 문의 버튼 → 안내 화면 표시
-const askText = (p) => `이 상품을 문의합니다\n상품번호 ${p.id}\n${location.origin}${location.pathname}#/${p.id}`;
-$('#ask').onclick = () => {
-  if (!current) return;
+// 문의 버튼 → 안내 화면 표시 (상세: 이 상품 / 장바구니: 담은 상품 전체)
+const linkOf = (id) => `${location.origin}${location.pathname}#/${id}`;
+const askText = (p) => `이 상품을 문의합니다\n상품번호 ${p.id}\n${linkOf(p.id)}`;
+let askMsg = '';   // 노란 버튼으로 복사할 문의 내용
+function openGuide(text, p) {
+  askMsg = text;
   const img = $('#gthumb');
-  img.onerror = () => fallback(img, current.id);
-  img.src = thumbUrl(current);
+  img.onerror = () => fallback(img, p.id);
+  img.src = thumbUrl(p);
   $('#guide').hidden = false;
-};
+}
+$('#ask').onclick = () => { if (current) openGuide(askText(current), current); };
 $('#gclose').onclick = () => { $('#guide').hidden = true; };
 $('#guide').onclick = (e) => { if (e.target.id === 'guide') $('#guide').hidden = true; };
 // 노란 버튼: 문의 내용 복사 → 카카오톡 채널 이동
 $('#go').onclick = async () => {
-  if (!current) return;
-  await copyText(askText(current));
+  if (!askMsg) return;
+  await copyText(askMsg);
   toast('문의 내용 복사됨');
   setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
+
+// ===== 장바구니: 이 휴대폰·브라우저에만 저장, 담은 지 14일 지나면 자동 삭제 =====
+const CART_KEY = 'cart', CART_DAYS = 14;
+let cart = [];   // [{id, n(수량), t(담은 시각)}]
+try { cart = JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) {}
+const findItem = (id) => state.items.find((p) => p.id === id);
+const won = (n) => n.toLocaleString('ko-KR') + '원';
+function saveCart() {
+  try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {}
+  const n = cart.reduce((s, c) => s + c.n, 0);
+  ['#cartn', '#addn'].forEach((s) => { $(s).textContent = n > 99 ? '99+' : n; $(s).hidden = !n; });
+}
+// 14일 지난 상품, 사이트에서 삭제된 상품 정리 (상품 목록 불러온 뒤 실행)
+function pruneCart() {
+  const limit = Date.now() - CART_DAYS * 864e5;
+  cart = cart.filter((c) => c.t > limit && findItem(c.id));
+  saveCart();
+}
+// 합계: 가격 있는 상품만 (가격 × 수량), 가격 없는 상품은 개수만
+function cartSum() {
+  let sum = 0, ask = 0;
+  cart.forEach((c) => { const p = findItem(c.id); if (p && p.price) sum += Number(p.price) * c.n; else ask++; });
+  if (!sum) return ask ? `가격 문의 ${ask}개` : '';
+  return `합계 ${won(sum)}` + (ask ? ` · 가격 문의 ${ask}개 별도` : '');
+}
+// 상세 🛒 버튼: 담기 (이미 담은 상품은 수량 +1)
+$('#add').onclick = () => {
+  if (!current) return;
+  const c = cart.find((x) => x.id === current.id);
+  if (c) { c.n = Math.min(99, c.n + 1); c.t = Date.now(); }
+  else cart.push({ id: current.id, n: 1, t: Date.now() });
+  saveCart();
+  toast(c ? `담김 · 수량 ${c.n}개` : '장바구니에 담김');
+};
+function renderCart() {
+  const ul = $('#clist');
+  ul.innerHTML = '';
+  cart.forEach((c) => {
+    const p = findItem(c.id);
+    if (!p) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<a class="cthumb" href="#/${p.id}"><img alt="" draggable="false"></a>
+      <div class="cinfo"><p class="cid">No. ${p.id}</p><p class="cname"></p>
+        <p class="cprice">${p.price ? won(Number(p.price) * c.n) : '가격 문의'}</p></div>
+      <div class="cqty"><button type="button" data-d="-1" aria-label="빼기">−</button><span>${c.n}</span><button type="button" data-d="1" aria-label="더하기">+</button></div>
+      <button class="cdel" type="button" aria-label="삭제">✕</button>`;
+    const img = li.querySelector('img');
+    img.onerror = () => fallback(img, p.id);
+    img.src = thumbUrl(p);
+    li.querySelector('.cname').textContent = p.name || '';
+    li.querySelector('.cthumb').onclick = () => { $('#cart').hidden = true; };   // 사진 누르면 상세로
+    li.querySelectorAll('[data-d]').forEach((b) => {
+      b.onclick = () => { c.n = Math.min(99, Math.max(1, c.n + Number(b.dataset.d))); saveCart(); renderCart(); };
+    });
+    li.querySelector('.cdel').onclick = () => { cart = cart.filter((x) => x !== c); saveCart(); renderCart(); };
+    ul.appendChild(li);
+  });
+  $('#cempty').hidden = cart.length > 0;
+  $('#csum').textContent = cartSum();
+  $('#csum').hidden = !cart.length;
+  $('#cgo').disabled = !cart.length;
+}
+// 전체 문의 내용: 번호. 상품번호 × 수량 (가격) + 링크, 마지막 줄 합계
+function cartText() {
+  const lines = ['장바구니 상품을 문의합니다'];
+  cart.forEach((c, i) => {
+    const p = findItem(c.id);
+    lines.push(`${i + 1}. ${c.id} × ${c.n}` + (p && p.price ? ` (${won(Number(p.price) * c.n)})` : ' (가격 문의)'), linkOf(c.id));
+  });
+  lines.push(cartSum());
+  return lines.join('\n');
+}
+$('#cartfab').onclick = () => { renderCart(); $('#cart').hidden = false; };
+$('#cclose').onclick = () => { $('#cart').hidden = true; };
+$('#cart').onclick = (e) => { if (e.target.id === 'cart') $('#cart').hidden = true; };
+$('#cgo').onclick = () => { if (cart.length) openGuide(cartText(), findItem(cart[0].id)); };   // 문의 후에도 장바구니 유지
 
 // ===== 확대 보기: 확대 버튼 → 두 손가락(PC는 휠·드래그)으로 확대·이동 → 닫기 =====
 const vw = $('#viewer'), vimg = $('#vimg');
@@ -349,6 +428,7 @@ fetch(CONFIG.dataUrl, { cache: 'no-cache' })
     $('#search').hidden = !state.items.some((p) => p.name);
     // 가격 있는 상품이 없으면 가격순 정렬 숨김
     if (!state.items.some((p) => p.price)) $('#sort').querySelectorAll('[value=low],[value=high]').forEach((o) => o.remove());
+    pruneCart();
     applyFilter();
     route();
   })
