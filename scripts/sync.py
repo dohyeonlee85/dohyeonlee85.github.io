@@ -25,7 +25,8 @@ THUMB_WIDTH = 480      # 목록 썸네일 가로 px
 DETAIL_MAX = 1280      # 상세 사진 긴 변 px
 THUMB_QUALITY = 75
 DETAIL_QUALITY = 82
-CATS1 = {'clothes-women', 'clothes-men'}
+CATS1 = {'clothes-women', 'clothes-men', 'bags'}
+NO_SUB = {'bags'}       # 소분류 없는 대분류 (소분류 칸 무시)
 CATS2 = {'top', 'bottom', 'outer', 'shoes', 'etc'}
 
 
@@ -165,8 +166,8 @@ def main():
             continue
         ids = drive_ids(get(row, '사진'))
         cat1 = str(get(row, '대분류')).strip()
-        cat2 = str(get(row, '소분류')).strip()
-        if not ids or cat1 not in CATS1 or cat2 not in CATS2:
+        cat2 = '' if cat1 in NO_SUB else str(get(row, '소분류')).strip()
+        if not ids or cat1 not in CATS1 or (cat2 not in CATS2 and cat1 not in NO_SUB):
             print(f'{r}행 건너뜀: 사진/분류 확인 필요')
             failed += 1
             continue

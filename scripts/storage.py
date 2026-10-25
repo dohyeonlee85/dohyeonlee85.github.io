@@ -1,6 +1,6 @@
 """R2 사용량 기록 → 시트 '용량' 탭 (드라이브는 Apps Script가 기록·알림).
 
-R2 95% 이상이면 360일 지난 상품 삭제: R2 사진 + products.json + 시트 '상태'에 '삭제됨'.
+R2 한도의 95% 이상이면 360일 지난 shop01 상품 삭제 (shop03·04 사진은 삭제 안 함): R2 사진 + products.json + 시트 '상태'에 '삭제됨'.
 드라이브 원본은 Apps Script가 '삭제됨' 표시를 보고 지움.
 """
 import json
@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta, timezone
 from upload import UPLOAD_TAB
 from sync import ID_HEADER, JSON_PATH, col_letter, google_services, r2_client, save_json
 
-R2_LIMIT = 10 * 1000 ** 3   # R2 무료 10GB
+R2_LIMIT = 30 * 1000 ** 3   # R2 사용 한도 30GB (무료 10GB + 유료 약 20GB, shop03·04 사진 포함, 2026-10-23)
 CLEAN_PCT = 95              # 이 비율 이상이면 오래된 상품 삭제
 KEEP_DAYS = 360             # 보관 기간
 USAGE_TAB = '용량'
