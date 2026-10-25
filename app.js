@@ -2,8 +2,13 @@
 const CONFIG = {
   dataUrl: 'products.json',
   kakaoUrl: 'http://pf.kakao.com/_TcxlBX/chat',
-  cat1: ['all', 'clothes-women', 'clothes-men'],
-  cat2: ['all', 'top', 'bottom', 'outer', 'shoes', 'etc'],
+  cat1: ['all', 'clothes-women', 'clothes-men', 'shoes', 'bags'],
+  // 대분류별 소분류 (여기 없는 대분류는 소분류 탭 숨김)
+  sub: {
+    'clothes-women': ['top', 'bottom', 'outer', 'etc'],
+    'clothes-men': ['top', 'bottom', 'outer', 'etc'],
+    shoes: ['slippers', 'boots'],
+  },
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
   newCount: 18, // 신상 가로줄 상품 수
   newPool: 50,  // 신상 후보: 최근 등록 50개 중 무작위 선택
@@ -38,10 +43,21 @@ function makeTabs(el, list, key) {
     b.onclick = () => {
       state[key] = name;
       el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+      if (key === 'cat1') toggleSub();
       applyFilter();
     };
     el.appendChild(b);
   });
+}
+
+// 대분류에 맞는 소분류 탭 다시 그림 (all: 전체 소분류, 소분류 없는 대분류: 숨김)
+function toggleSub() {
+  const list = state.cat1 === 'all'
+    ? [...new Set(Object.values(CONFIG.sub).flat())]
+    : CONFIG.sub[state.cat1] || [];
+  if (!list.includes(state.cat2)) state.cat2 = 'all';
+  makeTabs($('#cat2'), ['all', ...list], 'cat2');
+  $('#cat2').hidden = !list.length;
 }
 
 // ===== 목록 =====
@@ -127,7 +143,7 @@ let current = null, slideNo = 1;
 function openDetail(id) {
   const p = state.items.find((x) => x.id === id);
   if (!p) { closeDetail(); return; }
-  current = p;   if (window.gtag) gtag('event', 'view_item', { item_id: p.id, item_name: p.name || p.id });
+  current = p;
   const total = Math.max(1, Number(p.photos) || 1);
   const loop = total > 1;
   // 끝없이 넘기기: [마지막 사진 복제, 1 ~ N, 첫 사진 복제]
@@ -237,7 +253,7 @@ $('#guide').onclick = (e) => { if (e.target.id === 'guide') $('#guide').hidden =
 // 노란 버튼: 문의 내용 복사 → 카카오톡 채널 이동
 $('#go').onclick = async () => {
   if (!current) return;
-  if (window.gtag) gtag('event', 'ask_click', { item_id: current.id });   await copyText(askText(current));
+  await copyText(askText(current));
   toast('문의 내용 복사됨');
   setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
@@ -322,7 +338,7 @@ document.addEventListener('keydown', (e) => {
 
 // ===== 시작 =====
 makeTabs($('#cat1'), CONFIG.cat1, 'cat1');
-makeTabs($('#cat2'), CONFIG.cat2, 'cat2');
+toggleSub();
 fetch(CONFIG.dataUrl, { cache: 'no-cache' })
   .then((r) => r.json())
   .then((data) => {

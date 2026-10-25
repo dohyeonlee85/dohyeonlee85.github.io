@@ -31,25 +31,29 @@ HEADER = [ID_HEADER, '썸네일', '사진수', '분류', '상품명', '가격', 
 SYNCED = '반영'           # Firebase 사이트: 마지막으로 사이트에 보낸 값 (자동 기록, 손대지 않음)
 CATS = {
     '여성-상의': ('clothes-women', 'top'), '여성-하의': ('clothes-women', 'bottom'),
-    '여성-아우터': ('clothes-women', 'outer'), '여성-신발': ('clothes-women', 'shoes'),
-    '여성-기타': ('clothes-women', 'etc'),
+    '여성-아우터': ('clothes-women', 'outer'), '여성-기타': ('clothes-women', 'etc'),
     '남성-상의': ('clothes-men', 'top'), '남성-하의': ('clothes-men', 'bottom'),
-    '남성-아우터': ('clothes-men', 'outer'), '남성-신발': ('clothes-men', 'shoes'),
-    '남성-기타': ('clothes-men', 'etc'),
+    '남성-아우터': ('clothes-men', 'outer'), '남성-기타': ('clothes-men', 'etc'),
+    '신발-슬리퍼': ('shoes', 'slippers'), '신발-부츠': ('shoes', 'boots'),
     '가방': ('bags', ''),
+    # 옛 분류값: shoes 탭(all)에만 표시 → 신발-슬리퍼/부츠로 바꾼 뒤 삭제 가능
+    '여성-신발': ('shoes', ''), '남성-신발': ('shoes', ''),
 }
 SITES = [
     {'name': 'shop01', 'folder': '업로드', 'tab': '업로드', 'prefix': ''},
     {'name': 'shop03', 'folder': '업로드03', 'tab': '업로드03', 'prefix': 'shop03/',
      'project': 'shop03-8e79a', 'cat_tab': '분류03',
-     'cats': [('bag', ''), ('bag-charm', ''), ('bag-keyring', ''), ('sunglasses', ''), ('muffler', '')]},
+     'cats': [('bag', ''), ('bag', 'Hermè'), ('bag', '𝒸𝒽𝒶'), ('bag', '𝑳𝐕'), ('bag', 'Y𝑳'), ('bag', 'ᗺB'),
+              ('bag', '𝐏 𝐑 𝐀'), ('bag', '🏛️𝗖𝗘𝗟'), ('bag', '𝐃𝐢𝐨'), ('bag', 'miu'), ('bag', 'Etc.'),
+              ('bag-charm', ''), ('bag-keyring', ''), ('sunglasses', ''), ('muffler', '')]},
     {'name': 'shop04', 'folder': '업로드04', 'tab': '업로드04', 'prefix': 'shop04/',
      'project': 'shop04-ab6c5', 'cat_tab': '분류04',
-     'cats': [('Jewelry', 'Bracelet'), ('Jewelry', 'Necklace'), ('Jewelry', 'Ring'),
-              ('Jewelry', 'Earrings'), ('Jewelry', 'Jewelry Accessories'),
-              ('Watches', ''), ('Accessories', ''), ('clothes_women', ''), ('clothes_men', ''),
-              ('Shoes', 'Boots'), ('Shoes', 'Loafers'), ('Shoes', 'Mules'),
-              ('Shoes', 'Slides'), ('Shoes', 'Sneakers')]},
+     'cats': [('Jewelry', 'Bracelet'), ('Jewelry', 'Necklace'), ('Jewelry', 'Earrings'),
+              ('Jewelry', 'Ring'), ('Jewelry', 'Jewelry Accessories'),
+              ('Shoes', 'Boots'), ('Shoes', 'Flats & Loafers'), ('Shoes', 'Loafers'), ('Shoes', 'Mules'),
+              ('Shoes', 'Slippers & Slides'), ('Shoes', 'Sneakers'),
+              ('Accessories', 'belt'), ('Accessories', 'cap'), ('Accessories', 'muffler'),
+              ('Watches', ''), ('clothes_women', 'outer'), ('clothes_men', '')]},
 ]
 UPLOAD_TAB = SITES[0]['tab']   # storage.py에서 사용
 CAT_SEP = ' / '                # 분류 표시: '대분류 / 소분류'

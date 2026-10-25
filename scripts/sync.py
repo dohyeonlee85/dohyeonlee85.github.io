@@ -25,9 +25,9 @@ THUMB_WIDTH = 480      # 목록 썸네일 가로 px
 DETAIL_MAX = 1280      # 상세 사진 긴 변 px
 THUMB_QUALITY = 75
 DETAIL_QUALITY = 82
-CATS1 = {'clothes-women', 'clothes-men', 'bags'}
+CATS1 = {'clothes-women', 'clothes-men', 'shoes', 'bags'}
 NO_SUB = {'bags'}       # 소분류 없는 대분류 (소분류 칸 무시)
-CATS2 = {'top', 'bottom', 'outer', 'shoes', 'etc'}
+CATS2 = {'top', 'bottom', 'outer', 'shoes', 'etc', 'slippers', 'boots'}
 
 
 def google_services():
