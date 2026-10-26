@@ -26,7 +26,7 @@ header {
   background: var(--linen);
   border-bottom: 1px solid var(--dust-grey);
 }
-.bar { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+.bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px 2px 12px; }
 .logo { font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 1px; }
 input, button { font-family: inherit; }
 .logo { margin-right: auto; }
@@ -48,7 +48,18 @@ input, button { font-family: inherit; }
 #search:focus { border-color: var(--almond-silk); }
 
 
-/* 현재 분류 표시 줄 */
+/* 대분류 칩 줄 (넘치면 가로 스크롤) */
+#chips {
+  display: flex; gap: 6px; padding: 4px 12px 8px; overflow-x: auto; scrollbar-width: none;
+}
+#chips::-webkit-scrollbar { display: none; }
+#chips button {
+  flex: none; padding: 5px 12px; border-radius: 15px; font-size: 14px; letter-spacing: .3px;
+  border: 1px solid var(--dust-grey); background: var(--bg);
+}
+#chips button.on { background: var(--text); border-color: var(--text); color: #fff; }
+
+/* 소분류 표시 줄 */
 #crumb {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 8px 8px 14px; font-size: 14px; letter-spacing: .5px;
@@ -67,24 +78,36 @@ input, button { font-family: inherit; }
   padding: 10px 12px; border-bottom: 1px solid var(--dust-grey);
 }
 #mtitle { flex: 1; font-size: 18px; font-weight: 700; letter-spacing: 1px; }
-#mback, #mclose { width: 36px; height: 36px; font-size: 20px; }
-#mback[hidden] { display: none; }
+#mclose { width: 36px; height: 36px; font-size: 20px; }
 #mlist { list-style: none; overflow-y: auto; padding: 8px 0; }
 #mlist button {
   display: block; width: 100%; text-align: left;
   padding: 16px 24px; font-size: 22px; letter-spacing: .5px;
   border-bottom: 1px solid var(--powder-petal);
 }
+#mlist .mhead { padding: 18px 24px 10px; font-size: 15px; font-weight: 700; color: var(--text-sub); }
+#mlist .msub { padding: 12px 24px 12px 40px; font-size: 20px; }
 #mlist button.on { font-weight: 700; color: #b8833a; }
 
 /* 신상 가로줄 + 전체 3열 그리드 */
 #list { padding-bottom: 60px; }   /* 맨 아래 TOP 버튼 자리 */
-.sec h2 { font-size: 14px; font-weight: 600; padding: 16px 12px 8px; }
-.sechead { display: flex; justify-content: space-between; align-items: center; padding-right: 12px; }
-#sort {
-  font-size: 13px; color: var(--text); background: var(--bg);
-  border: 1px solid var(--dust-grey); border-radius: 14px; padding: 4px 8px; outline: none;
+.sec h2 { font-size: 14px; font-weight: 600; padding: 10px 12px 6px; }
+.sechead { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 0 0; }
+.sechead h2 { padding-top: 6px; }
+/* 정렬: 버튼 아래로 펼침 */
+#sortbox { position: relative; }
+#sortbtn {
+  display: flex; align-items: center; gap: 4px; font-size: 13px;
+  border: 1px solid var(--dust-grey); border-radius: 14px; padding: 3px 10px;
 }
+#sortlist {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 12; min-width: 100%;
+  list-style: none; background: var(--bg); border: 1px solid var(--dust-grey); border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .1); overflow: hidden;
+}
+#sortlist[hidden] { display: none; }
+#sortlist button { display: block; width: 100%; padding: 9px 14px; font-size: 13px; text-align: left; white-space: nowrap; }
+#sortlist button.on { font-weight: 700; color: #b8833a; }
 .row {
   display: flex; gap: 3px; padding: 0 3px; overflow-x: auto;
   scroll-snap-type: x proximity; scrollbar-width: none;
@@ -100,7 +123,7 @@ input, button { font-family: inherit; }
 .card { display: block; color: var(--text); text-decoration: none; }
 .thumb { aspect-ratio: 3 / 4; background: var(--powder-petal); overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.price { font-size: 12px; padding: 4px 4px 10px; }
+.price { font-size: 12px; padding: 3px 4px 6px; }
 #more { height: 1px; }
 #empty { padding: 60px 0; text-align: center; color: var(--text-sub); font-size: 14px; }
 
@@ -189,21 +212,20 @@ input, button { font-family: inherit; }
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
   background: var(--bg); border-top: 1px solid var(--parchment);
 }
+#detail .askbar { display: flex; gap: 8px; }
 #ask {
-  display: block; width: 100%;
+  display: block; flex: 1; width: 100%;
   padding: 14px; border-radius: 10px;
   background: #fee500; color: #191919; font-size: 15px; font-weight: 700;
 }
 
 
 
-/* 상세 🛒 담기: 문의하기 바 위 우측 원형 버튼 */
+/* 상세 🛒 담기: 문의하기 왼쪽 */
 #add {
-  position: absolute; right: 16px; bottom: calc(100% + 12px);
-  width: 54px; height: 54px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; background: #fff; border: 1px solid var(--dust-grey);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+  position: relative; flex: none; width: 38%;
+  padding: 14px 8px; border-radius: 10px; font-size: 15px; font-weight: 700;
+  background: #fff; border: 1px solid var(--dust-grey);
 }
 .badge {
   position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px;
@@ -303,7 +325,10 @@ input, button { font-family: inherit; }
   position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 30;
   padding: 10px 16px; border-radius: 20px;
   background: rgba(61, 52, 48, .9); color: #fff; font-size: 13px;
+  display: flex; align-items: center; gap: 12px; white-space: nowrap;
 }
+#toast[hidden] { display: none; }
+#toast a { color: #fee500; font-weight: 700; text-decoration: none; }
 
 /* 사진 보호: 길게 눌러 저장·드래그·선택 차단 */
 img {
