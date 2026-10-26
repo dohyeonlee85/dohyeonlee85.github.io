@@ -14,15 +14,27 @@
 </head>
 <body>
 
-<!-- 상단 고정: 사이트명 + 검색 + 카테고리 2단 탭 -->
+<!-- 상단 고정: 사이트명 + 🔍 검색 · ☰ 메뉴 · 🛒 장바구니 + 현재 분류 표시 줄 -->
 <header id="top">
   <div class="bar">
     <a class="logo" href="#">shop</a>
-    <input id="search" type="search" placeholder="search" autocomplete="off" hidden>
+    <input id="search" type="search" placeholder="search" autocomplete="off">
+    <button id="sbtn" class="ibtn" type="button" aria-label="검색" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+    <button id="mbtn" class="ibtn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <a id="cbtn" class="ibtn" href="#/cart" aria-label="장바구니"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2.2 10.5h10.8L21 7.5H6.4"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg><span id="cartn" class="badge" hidden></span></a>
   </div>
-  <nav id="cat1" class="tabs"></nav>
-  <nav id="cat2" class="tabs sub"></nav>
+  <div id="crumb" hidden><span id="crumbt"></span><button id="crumbx" type="button" aria-label="전체 보기">✕</button></div>
 </header>
+
+<!-- ☰ 전체 화면 메뉴: 대분류 → 소분류 -->
+<nav id="menu" hidden>
+  <div class="mbar">
+    <button id="mback" type="button" aria-label="뒤로" hidden>←</button>
+    <span id="mtitle">menu</span>
+    <button id="mclose" type="button" aria-label="닫기">✕</button>
+  </div>
+  <ul id="mlist"></ul>
+</nav>
 
 <!-- 상품 목록: 신상 가로줄 + 전체 (정렬) -->
 <main id="list">
@@ -46,8 +58,6 @@
 <div id="more"></div>
 <p id="empty" hidden>상품 없음</p>
 <button id="totop" type="button" hidden>TOP</button>
-<!-- 장바구니 열기 (우측 하단 원형 버튼, 숫자 = 담은 수량) -->
-<button id="cartfab" type="button" aria-label="장바구니">🛒<span id="cartn" class="badge" hidden></span></button>
 
 <!-- 상세 화면 -->
 <section id="detail" hidden>
@@ -75,6 +85,22 @@
   </div>
 </section>
 
+<!-- 장바구니 페이지 (#/cart) -->
+<section id="cartpage" hidden>
+  <div class="dbar"><button id="cback" type="button" aria-label="back">←</button><h2>장바구니</h2><span></span></div>
+  <div class="ctools">
+    <label class="chk"><input id="call" type="checkbox"><i></i>전체 선택 <span id="cseln"></span></label>
+    <button id="cdel" type="button">선택 삭제</button>
+  </div>
+  <ul id="clist"></ul>
+  <p id="cempty">담은 상품 없음</p>
+  <p class="cnote">이 휴대폰에만 저장 · 담은 지 14일 지나면 자동 삭제</p>
+  <div class="askbar">
+    <p id="csum"></p>
+    <button id="cgo" type="button">💬 문의하기</button>
+  </div>
+</section>
+
 <!-- 카카오톡 문의 안내 -->
 <div id="guide" hidden>
   <div class="sheet">
@@ -89,18 +115,6 @@
     </div>
     <button id="go" type="button">문의하기</button>
     <button id="gclose" type="button">닫기</button>
-  </div>
-</div>
-
-<!-- 장바구니 (아래에서 올라오는 패널) -->
-<div id="cart" hidden>
-  <div class="sheet">
-    <div class="chead"><h3>장바구니</h3><button id="cclose" type="button" aria-label="닫기">✕</button></div>
-    <ul id="clist"></ul>
-    <p id="cempty">담은 상품 없음</p>
-    <p id="csum"></p>
-    <button id="cgo" type="button">💬 전체 문의하기</button>
-    <p class="cnote">이 휴대폰에만 저장 · 담은 지 14일 지나면 자동 삭제</p>
   </div>
 </div>
 
