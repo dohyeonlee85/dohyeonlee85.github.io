@@ -35,7 +35,10 @@ input, button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center; color: var(--text);
 }
 .ibtn[hidden] { display: none; }
-#cbtn .badge { top: 0; right: -2px; }
+.ibtn .badge { top: 0; right: -2px; }
+/* 첨부 아이콘 (장바구니·말풍선): 글자색 따라감 */
+.ic { width: 22px; height: 21px; fill: currentColor; flex: none; }
+.ic-ask { width: 23px; height: 16px; fill: currentColor; flex: none; }
 /* 🔍 누르면 로고 자리에 검색창 펼침 */
 #search { display: none; }
 .bar.searching .logo { display: none; }
@@ -109,11 +112,13 @@ input, button { font-family: inherit; }
 #sortlist button { display: block; width: 100%; padding: 9px 14px; font-size: 13px; text-align: left; white-space: nowrap; }
 #sortlist button.on { font-weight: 700; color: #b8833a; }
 .row {
-  display: flex; gap: 3px; padding: 0 3px; overflow-x: auto;
+  display: flex; gap: 3px; padding: 0 3px; scroll-padding: 0 3px; overflow-x: auto;
   scroll-snap-type: x proximity; scrollbar-width: none;
 }
 .row::-webkit-scrollbar { display: none; }
-.row .card { flex: none; width: calc((100% - 12px) / 4.5); scroll-snap-align: start; }   /* 화면에 4.5장 */
+.row .card { flex: none; width: calc((100% - 6px) / 2.5); scroll-snap-align: start; }   /* 화면에 2.5장 */
+.row.moving { scroll-snap-type: none; }   /* 자동 넘김 중엔 스냅 끔 */
+#newno { font-size: 12px; color: var(--text-sub); letter-spacing: .5px; padding-top: 6px; }
 #totop {
   position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 15;
   padding: 8px 18px; border-radius: 18px; letter-spacing: 1px;
@@ -130,8 +135,8 @@ input, button { font-family: inherit; }
 /* 넓은 화면(PC)은 열 수 증가 */
 @media (min-width: 700px) {
   .grid { grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 0 12px; }
-  .row { gap: 6px; padding: 0 12px; }
-  .row .card { width: calc((100% - 36px) / 6.5); }
+  .row { gap: 6px; padding: 0 12px; scroll-padding: 0 12px; }
+  .row .card { width: calc((100% - 18px) / 3.5); }   /* PC 3.5장 */
   main, header, #detail { max-width: 1100px; margin: 0 auto; }
 }
 
@@ -148,6 +153,7 @@ input, button { font-family: inherit; }
   padding: 8px 12px; background: var(--linen); border-bottom: 1px solid var(--dust-grey);
 }
 #back { font-size: 22px; padding: 0 8px; }
+#dcbtn { color: var(--text); }
 #count {
   position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 1;
   padding: 3px 10px; border-radius: 12px;
@@ -213,20 +219,19 @@ input, button { font-family: inherit; }
   background: var(--bg); border-top: 1px solid var(--parchment);
 }
 #detail .askbar { display: flex; gap: 8px; }
-#ask {
-  display: block; flex: 1; width: 100%;
-  padding: 14px; border-radius: 10px;
-  background: #fee500; color: #191919; font-size: 15px; font-weight: 700;
+.askbar[hidden] { display: none; }
+/* 하단 버튼: 높이 56px 고정 (상세 [담기][문의하기] · 장바구니 [문의하기] 통일) */
+#add, .kbtn { height: 56px; border-radius: 10px; font-size: 15px; font-weight: 700; }
+.al { display: flex; align-items: center; justify-content: center; gap: 6px; }
+/* 노란 문의 버튼 + 아래 작은 안내 */
+.kbtn {
+  flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: #fee500; color: #191919; line-height: 1.2;
 }
-
-
-
+.kbtn:disabled { opacity: .4; }
+.khint { font-size: 11px; font-weight: 500; opacity: .7; }
 /* 상세 🛒 담기: 문의하기 왼쪽 */
-#add {
-  position: relative; flex: none; width: 38%;
-  padding: 14px 8px; border-radius: 10px; font-size: 15px; font-weight: 700;
-  background: #fff; border: 1px solid var(--dust-grey);
-}
+#add { position: relative; flex: none; width: 38%; background: #fff; border: 1px solid var(--dust-grey); }
 .badge {
   position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: 9px; background: #b8833a; color: #fff;
@@ -245,12 +250,15 @@ input, button { font-family: inherit; }
 #cartpage .dbar h2 { font-size: 17px; font-weight: 700; }
 #cartpage .dbar span, #cback { width: 38px; }
 #cback { font-size: 22px; text-align: left; padding: 0 8px; }
+.ctools[hidden], .cbtns[hidden] { display: none; }
 .ctools {
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px 16px; border-bottom: 1px solid var(--parchment); font-size: 14px;
 }
-#cdel { font-size: 13px; color: var(--text-sub); padding: 6px 10px; border: 1px solid var(--dust-grey); border-radius: 14px; }
-#cdel:disabled { opacity: .4; }
+/* 목록 아래 [선택 삭제][장바구니 비우기] */
+.cbtns { display: flex; gap: 6px; padding: 12px 16px; }
+.cbtns button { font-size: 13px; color: var(--text-sub); padding: 6px 12px; border: 1px solid var(--dust-grey); border-radius: 14px; }
+.cbtns button:disabled { opacity: .4; }
 /* 체크박스 (동그라미 체크) */
 .chk { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .chk input { position: absolute; opacity: 0; pointer-events: none; }
@@ -275,18 +283,15 @@ input, button { font-family: inherit; }
 .cname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cname:empty { display: none; }
 .cprice { font-weight: 700; font-size: 14px; }
-.cqty { flex: none; display: flex; align-items: center; border: 1px solid var(--dust-grey); border-radius: 16px; }
-.cqty button { width: 30px; height: 30px; font-size: 16px; }
-.cqty span { min-width: 20px; text-align: center; font-size: 14px; }
+/* 개별 삭제 ✕ (행 오른쪽 끝) */
+.cx { flex: none; width: 36px; height: 36px; font-size: 16px; color: var(--text-sub); }
 #cempty { padding: 60px 0; text-align: center; color: var(--text-sub); font-size: 14px; }
-#cempty[hidden], #csum[hidden] { display: none; }
-.cnote { padding: 12px 16px; text-align: center; font-size: 11px; color: #999; }
-#csum { padding: 0 2px 8px; text-align: right; font-size: 15px; font-weight: 700; }
-#cgo {
-  display: block; width: 100%; padding: 14px; border-radius: 10px;
-  background: #fee500; color: #191919; font-size: 15px; font-weight: 700;
+#cempty[hidden] { display: none; }
+.cshop {
+  display: inline-block; margin-top: 16px; padding: 10px 22px; border-radius: 20px;
+  border: 1px solid var(--dust-grey); color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none;
 }
-#cgo:disabled { opacity: .4; }
+.cnote { padding: 12px 16px; text-align: center; font-size: 11px; color: #999; }
 
 /* 카카오톡 문의 안내 (아래에서 올라오는 패널) */
 #guide {
@@ -321,13 +326,42 @@ input, button { font-family: inherit; }
 #go { padding: 16px; background: #fee500; color: #191919; font-size: 17px; }
 #gclose { margin-top: 8px; padding: 13px; background: #fff; border: 1px solid #ddd; font-size: 15px; font-weight: 600; }
 
+/* 알림: 하단 버튼(56px) 바로 위 */
 #toast {
-  position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 30;
+  position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30;
   padding: 10px 16px; border-radius: 20px;
   background: rgba(61, 52, 48, .9); color: #fff; font-size: 13px;
   display: flex; align-items: center; gap: 12px; white-space: nowrap;
 }
 #toast[hidden] { display: none; }
+#detail:not([hidden]) ~ #toast { left: 16px; transform: none; }   /* 상세: 담기 버튼 위 */
+
+/* 문의함 표시 · 복사 실패 글 상자 · 복귀 안내 */
+.ak {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 9px;
+  background: var(--parchment); color: var(--text-sub); font-size: 10px; font-weight: 600; line-height: 1.6; font-style: normal; vertical-align: middle;
+}
+.cprice:empty { display: none; }
+#fail {
+  position: fixed; inset: 0; z-index: 26;
+  background: rgba(0, 0, 0, .45);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+#fail[hidden] { display: none; }
+#ftext {
+  display: block; width: 100%; min-height: 130px; margin-bottom: 12px; padding: 10px;
+  border: 1px solid #ddd; border-radius: 10px; background: #fff; color: #222;
+  font-family: inherit; font-size: 14px; line-height: 1.5; resize: none; -webkit-user-select: text; user-select: text;
+}
+#fgo, #fclose { display: block; width: 100%; border-radius: 12px; font-weight: 700; }
+#fgo { padding: 16px; background: #fee500; color: #191919; font-size: 17px; }
+#fclose { margin-top: 8px; padding: 13px; background: #fff; border: 1px solid #ddd; font-size: 15px; font-weight: 600; }
+#hint {
+  position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 31;
+  padding: 11px 18px; border-radius: 20px;
+  background: rgba(61, 52, 48, .92); color: #fff; font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+#hint[hidden] { display: none; }
 #toast a { color: #fee500; font-weight: 700; text-decoration: none; }
 
 /* 사진 보호: 길게 눌러 저장·드래그·선택 차단 */

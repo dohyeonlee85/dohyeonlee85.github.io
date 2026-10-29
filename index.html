@@ -1,142 +1,207 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>shop</title>
-<!-- 웹폰트: 영문·숫자 EB Garamond(세리프) + 한글 Pretendard (필요한 글자만 내려받음) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TEC8Z6SS5Z"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TEC8Z6SS5Z');
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHOP</title>
+<style>
+/* ===== 톤앤무드: 이 변수만 바꾸면 전체 분위기 변경 ===== */
+:root{
+  --bg:#fbfbfc; --card:#fff; --fg:#17171c; --sub:#8a8a93; --line:#e9e9ee; --accent:#3a3dbd; --img:#efeff1;
+  --serif:"Noto Serif KR","Nanum Myeongjo","Apple SD Gothic Neo",Georgia,"Times New Roman",serif;
+  --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --r:22px; --maxw:960px;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.5}
+a{color:inherit;text-decoration:none}
+button,select{font:inherit;color:inherit}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+header{padding:22px 0 14px;text-align:center;font:700 22px var(--serif);letter-spacing:.04em;cursor:pointer}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);padding:8px 18px;border-radius:99px;cursor:pointer;font-size:14px}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.head{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.head h2{font:600 20px var(--serif)}
+.head span{font-size:13px;color:var(--sub);margin-right:8px}
+select{background:var(--card);border:1px solid var(--line);padding:6px 10px;border-radius:12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 14px;padding:16px 0 48px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--img);display:block;border-radius:var(--r)}
+.card .n{margin:10px 4px 0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .p{margin:0 4px;font-size:15px;font-weight:700}
+.old{font-weight:400;font-size:13px;color:var(--sub);text-decoration:line-through;margin-left:6px}
+.empty{padding:60px 0;text-align:center;color:var(--sub)}
+/* 상세 */
+.detail{max-width:560px;margin:0 auto}
+.hero{position:relative;background:var(--img)}
+.slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;align-items:flex-start;scrollbar-width:none}
+.slider::-webkit-scrollbar{display:none}
+.slider img{flex:none;width:100%;height:auto;scroll-snap-align:center;display:block}
+.fab{position:absolute;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);font-size:18px;cursor:pointer;display:grid;place-items:center}
+.back{top:14px;left:14px}
+.prev{left:10px;top:45%;width:32px;height:32px}.next{right:10px;top:45%;width:32px;height:32px}
+.thumbs{position:absolute;z-index:2;left:50%;bottom:44px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-radius:16px;max-width:92%;overflow-x:auto}
+.thumbs img{flex:none;width:50px;height:50px;object-fit:cover;border-radius:10px;border:2px solid transparent;cursor:pointer}
+.thumbs img.on{border-color:var(--accent)}
+.sheet{position:relative;z-index:3;margin-top:-28px;background:var(--card);border-radius:28px 28px 0 0;padding:24px 18px 60px}
+.trow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h1{font:600 22px/1.3 var(--serif)}
+.price{font-size:18px;font-weight:700;white-space:nowrap}
+.box{margin:18px 0;padding:12px 16px;border:1px solid var(--line);border-radius:16px}
+.box small{display:block;font-size:12px;color:var(--sub)}
+.box div{white-space:pre-wrap;font-size:15px}
+.sheet .d{width:100%;height:auto;display:block;border-radius:14px;margin-top:10px}
+</style>
 </head>
 <body>
-
-<!-- 상단 고정: 사이트명 + 🔍 검색 · 🛒 장바구니 · ☰ 소분류 메뉴 + 대분류 칩 줄 + 소분류 표시 줄 -->
-<header id="top">
-  <div class="bar">
-    <a class="logo" href="#">shop</a>
-    <input id="search" type="search" placeholder="search" autocomplete="off">
-    <button id="sbtn" class="ibtn" type="button" aria-label="검색" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
-    <a id="cbtn" class="ibtn" href="#/cart" aria-label="장바구니"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2.2 10.5h10.8L21 7.5H6.4"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg><span id="cartn" class="badge" hidden></span></a>
-    <button id="mbtn" class="ibtn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  </div>
-  <div id="chips"></div>
-  <div id="crumb" hidden><span id="crumbt"></span><button id="crumbx" type="button" aria-label="전체 보기">✕</button></div>
-</header>
-
-<!-- ☰ 전체 화면 메뉴: 대분류별 소분류 -->
-<nav id="menu" hidden>
-  <div class="mbar">
-    <span id="mtitle">menu</span>
-    <button id="mclose" type="button" aria-label="닫기">✕</button>
-  </div>
-  <ul id="mlist"></ul>
-</nav>
-
-<!-- 상품 목록: 신상 가로줄 + 전체 (정렬) -->
-<main id="list">
-  <section id="newbox" class="sec" hidden>
-    <h2>이번 주 신상</h2>
-    <div id="newrow" class="row"></div>
-  </section>
-  <section class="sec">
-    <div class="sechead">
-      <h2>전체</h2>
-      <div id="sortbox">
-        <button id="sortbtn" type="button" aria-haspopup="listbox"><span id="sortt">최신순</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-        <ul id="sortlist" role="listbox" hidden>
-          <li><button type="button" data-v="new">최신순</button></li>
-          <li><button type="button" data-v="old">등록순</button></li>
-          <li><button type="button" data-v="pop">인기순</button></li>
-        </ul>
-      </div>
-    </div>
-    <div id="grid" class="grid"></div>
-  </section>
-</main>
-<div id="more"></div>
-<p id="empty" hidden>상품 없음</p>
-<button id="totop" type="button" hidden>TOP</button>
-
-<!-- 상세 화면 -->
-<section id="detail" hidden>
-  <div class="dbar">
-    <button id="back" type="button" aria-label="back">←</button>
-  </div>
-  <div class="gallery">
-    <div id="slides"></div>
-    <button id="prev" class="nav" type="button" aria-label="prev">‹</button>
-    <button id="next" class="nav" type="button" aria-label="next">›</button>
-    <button id="zoom" type="button" aria-label="zoom">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20M10.5 7.5v6M7.5 10.5h6"/></svg>
-    </button>
-    <span id="count"></span>
-  </div>
-  <div class="info">
-    <p id="pid"></p>
-    <p id="pname"></p>
-    <p id="pprice"></p>
-    <p id="pdesc"></p>
-  </div>
-  <div class="askbar">
-    <button id="add" type="button">🛒 담기<span id="addn" class="badge" hidden></span></button>
-    <button id="ask" type="button">💬 문의하기</button>
-  </div>
-</section>
-
-<!-- 장바구니 페이지 (#/cart) -->
-<section id="cartpage" hidden>
-  <div class="dbar"><button id="cback" type="button" aria-label="back">←</button><h2>장바구니</h2><span></span></div>
-  <div class="ctools">
-    <label class="chk"><input id="call" type="checkbox"><i></i>전체 선택 <span id="cseln"></span></label>
-    <button id="cdel" type="button">선택 삭제</button>
-  </div>
-  <ul id="clist"></ul>
-  <p id="cempty">담은 상품 없음</p>
-  <p class="cnote">이 휴대폰에만 저장 · 담은 지 14일 지나면 자동 삭제</p>
-  <div class="askbar">
-    <p id="csum"></p>
-    <button id="cgo" type="button">💬 문의하기</button>
-  </div>
-</section>
-
-<!-- 카카오톡 문의 안내 -->
-<div id="guide" hidden>
-  <div class="sheet">
-    <h3>카카오톡으로 문의하기</h3>
-    <div class="gmid">
-      <div class="gimg"><img id="gthumb" alt="" draggable="false"></div>
-      <ol class="steps">
-        <li><b>1</b><div><em>노란 버튼</em> 누르기<small>문의 내용 자동 복사</small></div></li>
-        <li><b>2</b><div>카톡 <em>입력칸</em><br>꾹 누르기</div></li>
-        <li><b>3</b><div><em>붙여넣기</em> 후<br><em>전송</em></div></li>
-      </ol>
-    </div>
-    <button id="go" type="button">문의하기</button>
-    <button id="gclose" type="button">닫기</button>
-  </div>
+<div class="wrap">
+  <header id="logo">SHOP</header>
+  <div id="app"></div>
 </div>
 
-<!-- 확대 보기 (두 손가락으로 확대, PC는 마우스 휠) -->
-<div id="viewer" hidden>
-  <img id="vimg" alt="" draggable="false">
-  <button id="vclose" type="button">닫기</button>
-  <p class="vhint">두 손가락으로 확대 · 두 번 톡톡</p>
-</div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const fbApp=initializeApp({
+  apiKey:"AIzaSyAQL-s8O0Hp6Udpt4eME56sd6yQRCce_os",
+  authDomain:"shop03-8e79a.firebaseapp.com",
+  projectId:"shop03-8e79a",
+  storageBucket:"shop03-8e79a.firebasestorage.app",
+  messagingSenderId:"377032856980",
+  appId:"1:377032856980:web:4b14e87d0f115608356b81"
+});
+const db=getFirestore(fbApp);
+/* ===== 설정 ===== */
+const CONFIG = {
+  CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMJm9a7UlpbaxX-1pp3Yti8vZ_nd8edCvm82lccZT4_MmdNPB8TQtRIfckLnyWh60pCqkIw2VDN7tj/pub?output=csv",              // 구글 시트 '웹에 게시' CSV 주소를 여기에 붙여넣기 (비워두면 샘플 데이터)
+  IMG_DIR: "images",        // images/{상품번호}/t1.webp, d1.webp ...
+  IMG_EXT: "webp",
+  SHOP_NAME: "SHOP",
+  CURRENCY: "원"
+};
 
-<div id="toast" hidden></div>
+/* ===== CSV 파서 (따옴표·줄바꿈 대응) ===== */
+function parseCSV(t){
+  const rows=[];let r=[],c="",q=false;
+  for(let i=0;i<t.length;i++){
+    const ch=t[i];
+    if(q){ if(ch=='"'){ if(t[i+1]=='"'){c+='"';i++} else q=false } else c+=ch }
+    else if(ch=='"') q=true;
+    else if(ch==","){r.push(c);c=""}
+    else if(ch=="\n"||ch=="\r"){ if(ch=="\r"&&t[i+1]=="\n")i++; r.push(c);c=""; rows.push(r);r=[] }
+    else c+=ch;
+  }
+  if(c||r.length){r.push(c);rows.push(r)}
+  const h=rows.shift().map(s=>s.trim());
+  return rows.filter(x=>x.some(v=>v.trim())).map((x,i)=>{
+    const o={_order:i}; h.forEach((k,j)=>o[k]=(x[j]||"").trim()); return o;
+  });
+}
 
-<script src="app.js"></script>
+/* ===== 샘플 데이터 (CSV_URL 비었을 때) ===== */
+const SAMPLE = `상품번호,상품명,카테고리,가격,인기도,등록일,타이틀수,상세수,사이즈,노출,정상가
+1001,샘플 코튼 셔츠,상의,39000,50,2026-09-01,3,4,"S: 총장 68 / 어깨 44
+M: 총장 70 / 어깨 46",O,49000
+1002,샘플 와이드 팬츠,하의,45000,80,2026-09-15,2,3,"FREE: 허리 38 / 총장 98",O
+1003,샘플 캔버스 백,가방,29000,20,2026-10-01,2,2,"가로 32 / 세로 28 / 폭 12",O`;
+
+let ALL=[], state={cat:"전체",sort:"default"};
+const $=s=>document.querySelector(s), app=$("#app");
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const num=v=>parseInt(String(v).replace(/[^\d]/g,""))||0;
+const won=v=>num(v).toLocaleString("ko-KR")+CONFIG.CURRENCY;
+const img=(id,k,n)=>{const p=ALL.find(x=>x["상품번호"]==id);return p?((k=="t"?p.T:p.D)||[])[n-1]||"":""};
+
+async function load(){
+  try{
+    const snap=await getDocs(collection(db,"products"));
+    ALL=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.visible!==false)
+      .sort((x,y)=>x.createdAt-y.createdAt)
+      .map((p,i)=>({"상품번호":p.id,"상품명":p.name,"카테고리":p.category||"","가격":p.price,"정상가":p.oldPrice||0,
+        "인기도":p.pop||0,"등록일":new Date(p.createdAt).toISOString(),"타이틀수":(p.T||[]).length,"상세수":(p.D||[]).length,
+        "사이즈":p.size||"",T:p.T||[],D:p.D||[],_order:i}));
+  }catch(e){
+    app.innerHTML='<p class="empty">상품 정보를 불러오지 못했습니다.<br><small>'+esc(e.message||e)+'</small></p>'; return;
+  }
+  route();
+}
+
+function sorted(list){
+  const a=[...list];
+  switch(state.sort){
+    case "new": a.sort((x,y)=>(y["등록일"]||"").localeCompare(x["등록일"]||"")||y._order-x._order);break;
+    case "asc": a.sort((x,y)=>num(x["가격"])-num(y["가격"]));break;
+    case "desc":a.sort((x,y)=>num(y["가격"])-num(x["가격"]));break;
+    case "pop": a.sort((x,y)=>num(y["인기도"])-num(x["인기도"]));break;
+  }
+  return a;
+}
+
+function renderList(){
+  const cats=["전체",...new Set(ALL.map(p=>p["카테고리"]).filter(Boolean))];
+  if(!cats.includes(state.cat)) state.cat="전체";
+  const list=sorted(state.cat=="전체"?ALL:ALL.filter(p=>p["카테고리"]==state.cat));
+  app.innerHTML=`
+  <div class="cats">${cats.map(c=>`<button class="chip" aria-pressed="${c==state.cat}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+  <div class="head"><h2>${state.cat=="전체"?"New Arrivals":esc(state.cat)}</h2>
+    <div><span>${list.length}개</span>
+      <select id="sort" aria-label="정렬">
+        ${[["default","기본순"],["new","신상품순"],["asc","낮은 가격순"],["desc","높은 가격순"],["pop","인기순"]]
+          .map(([v,l])=>`<option value="${v}" ${v==state.sort?"selected":""}>${l}</option>`).join("")}
+      </select></div>
+  </div>
+  ${list.length?`<div class="grid">${list.map(p=>`
+    <a class="card" href="#/p/${encodeURIComponent(p["상품번호"])}">
+      <img src="${img(p["상품번호"],"t",1)}" alt="${esc(p["상품명"])}" loading="lazy" decoding="async">
+      <div class="n">${esc(p["상품명"])}</div>
+      <div class="p">${won(p["가격"])}${num(p["정상가"])>num(p["가격"])?`<span class="old">${won(p["정상가"])}</span>`:""}</div>
+    </a>`).join("")}</div>`:'<p class="empty">등록된 상품이 없습니다.</p>'}`;
+  app.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;renderList()});
+  $("#sort").onchange=e=>{state.sort=e.target.value;renderList()};
+}
+
+function renderDetail(id){
+  const p=ALL.find(x=>x["상품번호"]==id);
+  if(!p){ app.innerHTML='<p class="empty">상품을 찾을 수 없습니다.</p>'; return }
+  const T=Math.min(num(p["타이틀수"])||1,10), D=Math.min(num(p["상세수"]),10);
+  const range=n=>Array.from({length:n},(_,i)=>i+1);
+  app.innerHTML=`
+  <div class="detail">
+    <div class="hero">
+      <a class="fab back" href="#/" aria-label="목록으로">←</a>
+      ${T>1?`<button class="fab prev" aria-label="이전">‹</button><button class="fab next" aria-label="다음">›</button>`:""}
+      <div class="slider" id="sl">${range(T).map(i=>`<img src="${img(id,"t",i)}" alt="${esc(p["상품명"])} ${i}" ${i>1?'loading="lazy"':""} decoding="async">`).join("")}</div>
+      ${T>1?`<div class="thumbs" id="th">${range(T).map(i=>`<img src="${img(id,"t",i)}" alt="" data-i="${i-1}" loading="lazy">`).join("")}</div>`:""}
+    </div>
+    <div class="sheet">
+      <div class="trow"><h1>${esc(p["상품명"])}</h1>
+        <div class="price">${won(p["가격"])}${num(p["정상가"])>num(p["가격"])?`<span class="old">${won(p["정상가"])}</span>`:""}</div></div>
+      ${p["사이즈"]?`<div class="box"><small>Size</small><div>${esc(p["사이즈"])}</div></div>`:""}
+      ${range(D).map(i=>`<img class="d" src="${img(id,"d",i)}" alt="상세 ${i}" loading="lazy" decoding="async">`).join("")}
+    </div>
+  </div>`;
+  const sl=$("#sl"),th=$("#th");
+  if(th){
+    const go=i=>sl.scrollTo({left:Math.max(0,Math.min(T-1,i))*sl.clientWidth,behavior:"smooth"});
+    const cur=()=>Math.round(sl.scrollLeft/sl.clientWidth);
+    th.onclick=e=>{if(e.target.dataset.i!=null)go(+e.target.dataset.i)};
+    $(".prev").onclick=()=>go(cur()-1); $(".next").onclick=()=>go(cur()+1);
+    sl.addEventListener("scroll",()=>{th.querySelectorAll("img").forEach((x,i)=>x.classList.toggle("on",i==cur()))},{passive:true});
+    th.firstChild.classList.add("on");
+  }
+  scrollTo(0,0);
+}
+
+function route(){
+  const m=location.hash.match(/^#\/p\/(.+)$/);
+  m?renderDetail(decodeURIComponent(m[1])):renderList();
+}
+addEventListener("hashchange",route);
+$("#logo").onclick=()=>{location.hash="#/"};
+$("#logo").textContent=document.title=CONFIG.SHOP_NAME;
+load();
+</script>
 </body>
 </html>
