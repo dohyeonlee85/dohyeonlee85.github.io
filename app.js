@@ -10,14 +10,8 @@ const CONFIG = {
     shoes: ['slippers', 'boots'],
   },
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
-  newCount: 20, // 신상 가로줄 상품 수
-  newPool: 40,  // 신상 후보: 최근 등록 40개 중 무작위 선택
-  newAuto: 2000, // 신상 자동 넘김 간격(ms), 0 = 자동 넘김 끄기
-  newHold: 3000, // 손으로 넘긴 뒤 자동 넘김 다시 시작까지(ms)
-  // ===== 기능 스위치 (true = 켜기, false = 끄기) =====
-  quickAsk: true,   // 문의 1탭: 안내 팝업 없이 바로 복사 + 카톡 새 창 (false = 기존 안내 팝업)
-  priceHide: true,  // 가격 전면 비공개 (카드·상세·장바구니)
-  backHint: true,   // 카톡 갔다 돌아오면 '비슷한 상품 더 보기' 5초 표시
+  newCount: 18, // 신상 가로줄 상품 수
+  newPool: 50,  // 신상 후보: 최근 등록 50개 중 무작위 선택
 };
 
 const $ = (s) => document.querySelector(s);
@@ -35,11 +29,8 @@ function fallback(img, label) {
   img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 
-// 가격 없거나 priceHide 켜면 빈칸 (표시 생략)
-const showPrice = (p) => !CONFIG.priceHide && !!p.price;
-const priceText = (p) => (showPrice(p) ? Number(p.price).toLocaleString('ko-KR') + '원' : '');
-// 문의 버튼 아래 작은 안내 (quickAsk 켰을 때만)
-if (!CONFIG.quickAsk) document.querySelectorAll('.khint').forEach((e) => e.remove());
+// 가격 없으면 빈칸 (표시 생략)
+const priceText = (p) => (p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '');
 
 // ===== 대분류 칩 줄 (헤더 아래 상시 표시) =====
 function renderChips() {
@@ -135,76 +126,16 @@ function applyFilter() {
     (state.cat2 === 'all' || p.cat2 === state.cat2) &&
     (!q || [p.id, p.name, p.desc].join(' ').toLowerCase().includes(q))
   );
-  // 신상 가로줄: 최근 등록 40개 중 무작위 20개, 접속할 때마다 바뀜 (검색 중엔 숨김)
-  renderNew(q ? [] : shuffle(filtered.slice(0, CONFIG.newPool)).slice(0, CONFIG.newCount));
+  // 신상 가로줄: 최근 등록 50개 중 무작위 18개, 접속할 때마다 바뀜 (검색 중엔 숨김)
+  const row = $('#newrow');
+  row.innerHTML = '';
+  if (!q) shuffle(filtered.slice(0, CONFIG.newPool)).slice(0, CONFIG.newCount).forEach((p) => row.appendChild(makeCard(p)));
+  row.scrollLeft = 0;
+  $('#newbox').hidden = !row.children.length;
   showCrumb();
   renderGrid();
   window.scrollTo(0, 0);
 }
-
-// ===== 신상 가로줄: 2초마다 1장씩 왼쪽으로 자동 넘김, 끝나면 1번으로 이어짐 =====
-// 끝없이 넘기기: 뒤에 앞쪽 카드 복제 → 복제한 1번에 도착하면 진짜 1번 위치로 순간 이동
-// 손으로 밀면 멈췄다가 손 뗀 뒤 3초 후 다시 시작. 화면 밖·상세·장바구니·다른 탭이면 정지
-const nr = { row: $('#newrow'), n: 0, hold: 0, touch: false, anim: 0, seen: false };
-function renderNew(list) {
-  const row = nr.row;
-  row.innerHTML = '';
-  list.forEach((p) => row.appendChild(makeCard(p)));
-  nr.n = list.length;
-  // 화면에 다 보이면(PC 4장 이하) 자동 넘김 없음
-  if (nr.n > 4) list.slice(0, 4).forEach((p) => {
-    const c = makeCard(p);
-    c.tabIndex = -1;
-    c.setAttribute('aria-hidden', 'true');
-    row.appendChild(c);
-  });
-  cancelAnimationFrame(nr.anim);
-  row.scrollLeft = 0;
-  $('#newbox').hidden = !nr.n;
-  newNo();
-}
-const newStep = () => { const c = nr.row.children; return c.length > 1 ? c[1].offsetLeft - c[0].offsetLeft : 0; };
-const newAt = () => { const w = newStep(); return w ? Math.round(nr.row.scrollLeft / w) : 0; };
-function newNo() { $('#newno').textContent = nr.n > 1 ? `${(newAt() % nr.n) + 1} / ${nr.n}` : ''; }
-// 0.4초 부드럽게 미끄러지기 (스냅은 이동 중에만 끔)
-function slideTo(x) {
-  const row = nr.row, from = row.scrollLeft, t0 = performance.now();
-  row.classList.add('moving');
-  cancelAnimationFrame(nr.anim);
-  const go = (now) => {
-    const k = Math.min(1, (now - t0) / 400);
-    row.scrollLeft = from + (x - from) * (1 - Math.pow(1 - k, 3));
-    if (k < 1) nr.anim = requestAnimationFrame(go);
-    else { row.classList.remove('moving'); newWrap(); }
-  };
-  nr.anim = requestAnimationFrame(go);
-}
-// 복제 구간에 들어가면 같은 진짜 카드 위치로 순간 이동
-function newWrap() {
-  const w = newStep();
-  if (nr.n > 4 && w && newAt() >= nr.n) nr.row.scrollLeft -= nr.n * w;
-}
-function newTick() {
-  const run = CONFIG.newAuto && nr.n > 4 && nr.seen && !nr.touch && Date.now() > nr.hold
-    && !document.hidden && $('#detail').hidden && $('#cartpage').hidden && $('#menu').hidden
-    && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (run) slideTo((newAt() + 1) * newStep());
-}
-if (CONFIG.newAuto) setInterval(newTick, CONFIG.newAuto);
-new IntersectionObserver((e) => { nr.seen = e[0].isIntersecting; }).observe(nr.row);
-const newStop = () => { nr.touch = true; cancelAnimationFrame(nr.anim); nr.row.classList.remove('moving'); };
-const newGo = () => { nr.touch = false; nr.hold = Date.now() + CONFIG.newHold; };
-nr.row.addEventListener('pointerdown', newStop);
-nr.row.addEventListener('touchstart', newStop, { passive: true });
-['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach((t) => nr.row.addEventListener(t, newGo, { passive: true }));
-nr.row.addEventListener('wheel', () => { nr.hold = Date.now() + CONFIG.newHold; }, { passive: true });
-let nrT;
-nr.row.addEventListener('scroll', () => {
-  newNo();
-  if (nr.row.classList.contains('moving')) return;
-  clearTimeout(nrT);
-  nrT = setTimeout(newWrap, 150);   // 손으로 넘긴 경우: 멈춘 뒤 복제 구간 정리
-}, { passive: true });
 
 // 정렬기준 적용 후 전체 목록 다시 그림 (인기순: 최근 30일 조회수, 같으면 최신순)
 function renderGrid() {
@@ -223,7 +154,7 @@ function makeCard(p) {
   a.className = 'card';
   a.href = '#/' + p.id;
   a.innerHTML = `<div class="thumb"><img loading="lazy" decoding="async" alt="" draggable="false"></div>`
-    + (showPrice(p) ? `<div class="price">${priceText(p)}</div>` : '');
+    + (p.price ? `<div class="price">${priceText(p)}</div>` : '');
   const img = a.querySelector('img');
   img.onerror = () => fallback(img, p.id);
   img.src = thumbUrl(p);
@@ -313,7 +244,7 @@ function openDetail(id) {
   $('#pname').textContent = p.name || '';
   $('#pname').hidden = !p.name;
   $('#pprice').textContent = priceText(p);
-  $('#pprice').hidden = !showPrice(p);
+  $('#pprice').hidden = !p.price;
   $('#pdesc').textContent = p.desc || '';
   $('#pdesc').hidden = !p.desc;
   $('#detail').hidden = false;
@@ -334,7 +265,7 @@ function closeDetail() {
 let fromList = false;
 document.addEventListener('click', (e) => {
   if (e.target.closest('.card, .cthumb')) fromList = true;   // 목록·장바구니에서 상세로
-  if (e.target.closest('.cartlink')) cartFrom = true;   // 상단 🛒(목록·상세)에서 장바구니로
+  if (e.target.closest('#cbtn')) cartFrom = true;
 });
 // 사진 좌우 이동 버튼
 const slideBy = (d) => $('#slides').scrollBy({ left: d * $('#slides').clientWidth, behavior: 'smooth' });
@@ -352,7 +283,7 @@ function route() {
   if (m) openDetail(decodeURIComponent(m[1]));
   else { closeDetail(); fromList = false; cartFrom = false; }
 }
-window.addEventListener('hashchange', () => { $('#hint').hidden = true; route(); });   // 화면 바뀌면 복귀 안내 닫기
+window.addEventListener('hashchange', route);
 
 // ===== 문의: 상품번호 복사 → 카카오톡 채널 이동 =====
 function copyText(text) {
@@ -363,17 +294,12 @@ function copyText(text) {
 function legacyCopy(text) {
   const t = document.createElement('textarea');
   t.value = text;
-  t.setAttribute('readonly', '');
   t.style.position = 'fixed';
-  t.style.top = '0';
   t.style.opacity = '0';
   document.body.appendChild(t);
   t.select();
-  t.setSelectionRange(0, text.length);   // 아이폰
-  let ok = false;
-  try { ok = document.execCommand('copy'); } catch (e) {}
+  try { document.execCommand('copy'); } catch (e) {}
   t.remove();
-  return ok;
 }
 // link: 알림 오른쪽 버튼 [글자, 주소] (있으면 3초 표시)
 function toast(msg, link) {
@@ -393,113 +319,62 @@ function toast(msg, link) {
 // 문의 버튼 → 안내 화면 표시 (상세: 이 상품 / 장바구니: 담은 상품 전체)
 const linkOf = (id) => `${location.origin}${location.pathname}#/${id}`;
 const askText = (p) => `이 상품을 문의합니다\n상품번호 ${p.id}\n${linkOf(p.id)}`;
-let askMsg = '', askPs = [];   // 노란 버튼으로 복사할 문의 내용·상품
-function openGuide(text, ps) {
+let askMsg = '';   // 노란 버튼으로 복사할 문의 내용
+function openGuide(text, p) {
   askMsg = text;
-  askPs = ps;
-  const p = ps[0];
   const img = $('#gthumb');
   img.onerror = () => fallback(img, p.id);
   img.src = thumbUrl(p);
   $('#guide').hidden = false;
 }
-$('#ask').onclick = () => { if (current) ask([current], askText(current)); };
+$('#ask').onclick = () => { if (current) openGuide(askText(current), current); };
 $('#gclose').onclick = () => { $('#guide').hidden = true; };
 $('#guide').onclick = (e) => { if (e.target.id === 'guide') $('#guide').hidden = true; };
 // 노란 버튼: 문의 내용 복사 → 카카오톡 채널 이동
 $('#go').onclick = async () => {
   if (!askMsg) return;
   await copyText(askMsg);
-  askDone(askPs);
   toast('문의 내용 복사됨');
   setTimeout(() => { $('#guide').hidden = true; location.href = CONFIG.kakaoUrl; }, 600);
 };
 
-// ps: 문의할 상품 목록, text: 복사할 문의 글 (상품번호 + 상품 링크)
-function ask(ps, text) {
-  if (!ps.length) return;
-  if (CONFIG.quickAsk) askNow(ps, text);
-  else openGuide(text, ps);
-}
-const ga = (name, ps) => { if (window.gtag) gtag('event', name, { items: ps.map((p) => ({ item_id: p.id, item_name: p.name || p.id })) }); };
-// 문의함 표시 (이 휴대폰에만 저장)
-const ASK_KEY = 'asked';
-function askedGet() { try { return JSON.parse(localStorage.getItem(ASK_KEY)) || []; } catch (e) { return []; } }
-function askDone(ps) {
-  const a = new Set(askedGet());
-  ps.forEach((p) => a.add(p.id));
-  try { localStorage.setItem(ASK_KEY, JSON.stringify([...a].slice(-300))); } catch (e) {}
-  try { sessionStorage.setItem('askback', ps[0].id); } catch (e) {}   // 복귀 안내용
-  ga('kakao_inquiry', ps);
-  if (!$('#cartpage').hidden) renderCart();
-}
-const goKakao = () => { window.open(CONFIG.kakaoUrl, '_blank') || (location.href = CONFIG.kakaoUrl); };
-// quickAsk: 누르는 순간 복사 → 카톡 새 창 (복사 실패 시에만 글 상자)
-function askNow(ps, text) {
-  const done = () => { askDone(ps); goKakao(); };
-  if (legacyCopy(text)) return done();
-  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(done, () => askFail(text, done));
-}
-let failDone = null;
-function askFail(text, done) {
-  failDone = done;
-  $('#ftext').value = text;
-  $('#fail').hidden = false;
-}
-$('#ftext').onfocus = () => $('#ftext').select();
-$('#fgo').onclick = () => { $('#fail').hidden = true; if (failDone) failDone(); };
-$('#fclose').onclick = () => { $('#fail').hidden = true; };
-$('#fail').onclick = (e) => { if (e.target.id === 'fail') $('#fail').hidden = true; };
-
-// ===== 복귀 안내: 카톡 갔다 돌아오면 '비슷한 상품 더 보기' 5초 (같은 분류 목록으로) =====
-function backHint() {
-  if (!CONFIG.backHint || document.hidden) return;
-  let id = null;
-  try { id = sessionStorage.getItem('askback'); sessionStorage.removeItem('askback'); } catch (e) {}
-  if (!id) return;
-  const h = $('#hint');
-  h.hidden = false;
-  h.onclick = () => {
-    h.hidden = true;
-    const p = findItem(id);
-    location.hash = '';
-    if (p) setCat(p.cat1, CONFIG.sub[p.cat1] && CONFIG.sub[p.cat1].includes(p.cat2) ? p.cat2 : 'all');
-  };
-  clearTimeout(backHint.t);
-  backHint.t = setTimeout(() => { h.hidden = true; }, 5000);
-}
-document.addEventListener('visibilitychange', backHint);
-window.addEventListener('pageshow', backHint);
-
-// ===== 장바구니: 이 휴대폰·브라우저에만 저장, 담은 지 14일 지나면 자동 삭제 (수량 없음) =====
+// ===== 장바구니: 이 휴대폰·브라우저에만 저장, 담은 지 14일 지나면 자동 삭제 =====
 const CART_KEY = 'cart', CART_DAYS = 14;
-let cart = [];   // [{id, t(담은 시각), s(false = 체크 해제)}]
+let cart = [];   // [{id, n(수량), t(담은 시각)}]
 try { cart = JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) {}
 const findItem = (id) => state.items.find((p) => p.id === id);
 const won = (n) => n.toLocaleString('ko-KR') + '원';
-// 저장 + 🛒 배지(담긴 상품 개수) 갱신: 목록 상단·상세 상단·담기 버튼
 function saveCart() {
   try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {}
-  const n = cart.length;
-  document.querySelectorAll('.cartn').forEach((el) => { el.textContent = n > 99 ? '99+' : n; el.hidden = !n; });
+  const n = cart.reduce((s, c) => s + c.n, 0);
+  ['#cartn', '#addn'].forEach((s) => { $(s).textContent = n > 99 ? '99+' : n; $(s).hidden = !n; });
 }
-// 14일 지난 상품, 사이트에서 삭제된 상품 정리 (상품 목록 불러온 뒤 실행). 예전 수량(n) 값은 버림
+// 14일 지난 상품, 사이트에서 삭제된 상품 정리 (상품 목록 불러온 뒤 실행)
 function pruneCart() {
   const limit = Date.now() - CART_DAYS * 864e5;
-  cart = cart.filter((c) => c.t > limit && findItem(c.id)).map(({ id, t, s }) => ({ id, t, s }));
+  cart = cart.filter((c) => c.t > limit && findItem(c.id));
   saveCart();
 }
-// 체크한 상품 (기본값 체크)
+// 체크한 상품 (기본값 체크, s: false = 체크 해제)
 const picked = () => cart.filter((c) => c.s !== false);
-// 상세 🛒 담기: 처음이면 담기, 이미 담았으면 알림만 (둘 다 3초 '장바구니 가기')
+// 합계: 체크한 상품 중 가격 있는 상품만 (가격 × 수량), 가격 없는 상품은 개수만
+function cartSum() {
+  let sum = 0, ask = 0;
+  picked().forEach((c) => { const p = findItem(c.id); if (p && p.price) sum += Number(p.price) * c.n; else ask++; });
+  if (!sum) return ask ? `가격 문의 ${ask}개` : '';
+  return `합계 ${won(sum)}` + (ask ? ` · 가격 문의 ${ask}개 별도` : '');
+}
+// 상세 🛒 담기 버튼 (이미 담은 상품은 수량 +1)
 $('#add').onclick = () => {
   if (!current) return;
-  const had = cart.some((x) => x.id === current.id);
-  if (!had) { cart.push({ id: current.id, t: Date.now(), s: true }); saveCart(); ga('add_to_cart', [current]); }
-  toast(had ? '이미 담긴 상품' : '장바구니에 담김', ['장바구니 가기', '#/cart']);
+  const c = cart.find((x) => x.id === current.id);
+  if (c) { c.n = Math.min(99, c.n + 1); c.t = Date.now(); }
+  else cart.push({ id: current.id, n: 1, t: Date.now(), s: true });
+  saveCart();
+  toast(c ? `담김 · 수량 ${c.n}개` : '장바구니에 담김', ['장바구니 가기', '#/cart']);
 };
-// ===== 장바구니 페이지 (#/cart) =====
-let cartFrom = false;   // 상단 🛒·알림으로 들어왔으면 ← = 뒤로가기 (상세에서 왔으면 상세로)
+// ===== 장바구니 페이지 (#/cart): 체크박스·수량 − +·선택 삭제·선택 문의 =====
+let cartFrom = false;   // 상단 🛒로 들어왔으면 ← 뒤로가기
 function openCart() {
   renderCart();
   $('#cartpage').hidden = false;
@@ -519,16 +394,15 @@ $('#cback').onclick = () => {
 function renderCart() {
   const ul = $('#clist');
   ul.innerHTML = '';
-  const asked = new Set(askedGet());
   cart.forEach((c) => {
     const p = findItem(c.id);
     if (!p) return;
     const li = document.createElement('li');
     li.innerHTML = `<label class="chk"><input type="checkbox"><i></i></label>
       <a class="cthumb" href="#/${p.id}"><img alt="" draggable="false"></a>
-      <div class="cinfo"><p class="cid">No. ${p.id}${asked.has(p.id) ? '<em class="ak">문의함</em>' : ''}</p><p class="cname"></p>
-        <p class="cprice">${showPrice(p) ? won(Number(p.price)) : CONFIG.priceHide ? '' : '가격 문의'}</p></div>
-      <button class="cx" type="button" aria-label="삭제">✕</button>`;
+      <div class="cinfo"><p class="cid">No. ${p.id}</p><p class="cname"></p>
+        <p class="cprice">${p.price ? won(Number(p.price) * c.n) : '가격 문의'}</p></div>
+      <div class="cqty"><button type="button" data-d="-1" aria-label="빼기">−</button><span>${c.n}</span><button type="button" data-d="1" aria-label="더하기">+</button></div>`;
     const box = li.querySelector('input');
     box.checked = c.s !== false;
     box.onchange = () => { c.s = box.checked; saveCart(); renderCart(); };
@@ -536,16 +410,18 @@ function renderCart() {
     img.onerror = () => fallback(img, p.id);
     img.src = thumbUrl(p);
     li.querySelector('.cname').textContent = p.name || '';
-    li.querySelector('.cx').onclick = () => { cart = cart.filter((x) => x !== c); saveCart(); renderCart(); };   // 개별 삭제 (확인 없음)
+    li.querySelectorAll('[data-d]').forEach((b) => {
+      b.onclick = () => { c.n = Math.min(99, Math.max(1, c.n + Number(b.dataset.d))); saveCart(); renderCart(); };
+    });
     ul.appendChild(li);
   });
-  const n = picked().length, has = cart.length > 0;
-  $('#call').checked = has && n === cart.length;
+  const n = picked().length;
+  $('#call').checked = cart.length > 0 && n === cart.length;
   $('#cseln').textContent = `(${n}/${cart.length})`;
-  // 비었으면: 도구·하단 문의 버튼 숨기고 '쇼핑 계속하기'
-  $('#cempty').hidden = has;
-  $('.ctools').hidden = $('.cbtns').hidden = $('#cartpage .askbar').hidden = !has;
-  $('#cgot').textContent = n ? `문의하기 (${n}개)` : '문의하기';
+  $('#cempty').hidden = cart.length > 0;
+  $('#csum').textContent = cartSum();
+  $('#csum').hidden = !n;
+  $('#cgo').textContent = n ? `💬 문의하기 (${n}개)` : '💬 문의하기';
   $('#cgo').disabled = $('#cdel').disabled = !n;
 }
 $('#call').onchange = (e) => { cart.forEach((c) => { c.s = e.target.checked; }); saveCart(); renderCart(); };
@@ -556,23 +432,17 @@ $('#cdel').onclick = () => {
   saveCart();
   renderCart();
 };
-$('#cclear').onclick = () => {
-  if (!cart.length || !confirm('장바구니를 비울까요?')) return;
-  cart = [];
-  saveCart();
-  renderCart();
-};
-$('.cshop').onclick = (e) => { e.preventDefault(); location.hash = ''; };
-// 문의 내용 (체크한 상품만): 번호. 상품번호 (가격) + 링크
+// 문의 내용 (체크한 상품만): 번호. 상품번호 × 수량 (가격) + 링크, 마지막 줄 합계
 function cartText() {
-  const lines = [`상품 ${picked().length}개 문의합니다`];
+  const lines = ['장바구니 상품을 문의합니다'];
   picked().forEach((c, i) => {
     const p = findItem(c.id);
-    lines.push(`${i + 1}. ${c.id}` + (p && showPrice(p) ? ` (${won(Number(p.price))})` : CONFIG.priceHide ? '' : ' (가격 문의)'), linkOf(c.id));
+    lines.push(`${i + 1}. ${c.id} × ${c.n}` + (p && p.price ? ` (${won(Number(p.price) * c.n)})` : ' (가격 문의)'), linkOf(c.id));
   });
+  lines.push(cartSum());
   return lines.join('\n');
 }
-$('#cgo').onclick = () => { const s = picked().map((c) => findItem(c.id)).filter(Boolean); if (s.length) ask(s, cartText()); };   // 문의 후에도 장바구니 유지 (문의함 표시)
+$('#cgo').onclick = () => { const s = picked(); if (s.length) openGuide(cartText(), findItem(s[0].id)); };   // 문의 후에도 장바구니 유지
 
 // ===== 확대 보기: 확대 버튼 → 두 손가락(PC는 휠·드래그)으로 확대·이동 → 닫기 =====
 const vw = $('#viewer'), vimg = $('#vimg');
@@ -646,7 +516,7 @@ window.addEventListener('popstate', () => {
 });
 
 // ===== 사진 보호: 우클릭·길게 누르기 메뉴, 드래그, 저장 단축키(Ctrl+S·U·P) 차단 =====
-document.addEventListener('contextmenu', (e) => { if (!e.target.closest('input, textarea')) e.preventDefault(); });
+document.addEventListener('contextmenu', (e) => { if (!e.target.closest('input')) e.preventDefault(); });
 document.addEventListener('dragstart', (e) => e.preventDefault());
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && ['s', 'u', 'p'].includes(e.key.toLowerCase())) e.preventDefault();

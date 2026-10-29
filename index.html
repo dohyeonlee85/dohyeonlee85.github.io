@@ -22,19 +22,13 @@
 </head>
 <body>
 
-<!-- 아이콘 모음 (장바구니·문의 말풍선): <use href="#i-cart">로 재사용, 색은 글자색 따라감 -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-<symbol id="i-cart" viewBox="16 25 600 570"><path transform="translate(0,603) scale(.1,-.1)" d="M252 5770 c-106 -25 -132 -167 -43 -227 33 -22 41 -23 271 -23 131 0 261 -5 291 -10 66 -13 119 -48 148 -100 16 -29 265 -744 366 -1055 8 -22 84 -247 170 -500 152 -448 271 -796 393 -1157 l60 -177 -71 -34 c-278 -132 -401 -441 -290 -727 61 -158 190 -277 363 -336 53 -18 117 -19 1897 -19 l1843 0 30 31 c57 56 56 135 0 189 l-31 30 -1827 5 -1827 5 -57 28 c-233 114 -226 451 11 561 l46 21 1580 5 1580 5 57 22 c117 45 216 130 268 233 16 31 177 525 350 1075 21 66 86 271 145 455 199 622 188 585 181 632 -9 61 -44 117 -94 153 l-44 30 -2320 5 -2321 5 -99 290 c-54 160 -110 314 -125 342 -37 74 -137 167 -218 204 -37 17 -97 34 -138 39 -86 11 -498 11 -545 0z m5625 -1154 c-3 -8 -33 -99 -66 -203 -32 -103 -80 -253 -106 -333 -26 -80 -60 -188 -77 -240 -62 -196 -242 -763 -310 -974 -66 -206 -73 -222 -113 -261 -33 -33 -55 -46 -96 -55 -40 -8 -435 -10 -1494 -8 l-1440 3 -92 270 c-97 287 -172 509 -436 1285 -90 267 -168 495 -171 508 l-7 22 2206 0 c1898 0 2206 -2 2202 -14z M2210 1297 c-106 -32 -184 -79 -266 -162 -245 -246 -242 -625 5 -875 121 -123 267 -183 441 -183 288 1 531 192 605 478 19 76 19 214 0 290 -56 222 -235 403 -452 459 -90 24 -240 20 -333 -7z m332 -269 c200 -93 270 -349 146 -534 -122 -181 -380 -211 -541 -64 -155 142 -166 363 -25 516 79 86 151 115 278 111 68 -2 97 -8 142 -29z M4735 1301 c-244 -70 -427 -283 -453 -527 -33 -304 143 -577 432 -670 109 -35 257 -37 361 -4 170 53 311 171 384 322 175 362 -18 782 -407 883 -80 20 -239 19 -317 -4z m321 -274 c93 -47 158 -119 190 -209 23 -65 20 -181 -7 -253 -31 -83 -121 -173 -204 -204 -80 -31 -188 -31 -265 -2 -75 28 -158 104 -195 177 -28 54 -30 67 -30 164 0 89 4 112 23 151 46 92 120 158 220 196 24 9 68 12 127 10 73 -3 99 -8 141 -30z"/></symbol>
-<symbol id="i-ask" viewBox="15 9 228 159"><path transform="translate(0,175) scale(.1,-.1)" d="M1480 1649 c-194 -16 -486 -97 -660 -184 -90 -45 -260 -168 -339 -244 -123 -121 -331 -385 -331 -422 0 -20 29 -19 63 1 46 27 127 36 200 20 140 -29 272 -123 505 -361 222 -228 379 -322 626 -375 105 -22 298 -15 406 16 255 73 417 261 466 541 22 127 15 370 -15 482 -64 242 -240 407 -521 488 -169 48 -221 53 -400 38z m354 -64 c139 -40 195 -65 288 -127 96 -65 135 -108 178 -203 49 -105 61 -168 67 -347 7 -212 -12 -318 -85 -462 -56 -114 -205 -226 -372 -283 -68 -23 -85 -25 -180 -20 -247 14 -455 110 -713 329 -231 195 -344 280 -432 323 -120 60 -199 79 -288 70 l-69 -6 43 62 c136 194 404 433 581 518 98 46 329 122 444 145 203 42 397 42 538 1z M1147 1354 c-4 -4 -7 -39 -7 -78 0 -39 -3 -88 -6 -108 -6 -35 -9 -38 -39 -38 -37 0 -35 -3 -50 130 -9 80 -13 90 -40 90 -21 0 -24 -6 -31 -57 -13 -96 -11 -650 3 -664 8 -8 20 -8 47 1 l36 12 0 219 0 219 36 0 37 0 -5 -224 c-3 -124 -2 -230 3 -237 8 -13 79 -16 99 -4 9 6 10 75 5 304 -4 163 -10 328 -14 366 -6 69 -6 70 -36 73 -17 2 -34 0 -38 -4z M1291 1336 c-12 -16 -20 -109 -32 -426 -10 -258 -9 -275 7 -287 12 -8 51 -13 112 -13 91 0 93 1 90 22 -3 20 -10 23 -56 26 l-52 3 2 207 3 207 52 5 c57 6 68 12 60 34 -4 10 -23 16 -59 18 l-53 3 0 80 0 80 64 5 c39 3 66 10 69 17 5 17 -9 21 -110 26 -59 3 -90 1 -97 -7z M1555 1329 c-8 -11 -24 -423 -25 -620 l0 -106 165 -7 c171 -7 215 -3 215 19 0 16 -23 25 -66 25 l-34 0 -2 348 -3 347 -29 0 c-23 0 -31 -5 -37 -26 -3 -15 -10 -169 -14 -343 -4 -174 -11 -319 -16 -321 -4 -3 -26 -3 -48 1 l-41 7 -2 341 -3 341 -27 3 c-14 2 -29 -2 -33 -9z M1953 1324 c-36 -30 -56 -171 -57 -399 -1 -151 2 -202 16 -249 20 -68 28 -76 84 -76 93 0 114 59 121 346 8 308 -10 378 -104 391 -28 4 -44 0 -60 -13z m101 -91 c8 -27 10 -505 2 -530 -8 -24 -35 -38 -49 -24 -35 35 -36 442 -1 554 3 9 14 17 24 17 10 0 21 -8 24 -17z"/></symbol>
-</svg>
-
-<!-- 상단 고정: 사이트명 + 🔍 검색 · 🛒 장바구니(배지) · ☰ 소분류 메뉴 + 대분류 칩 줄 + 소분류 표시 줄 -->
+<!-- 상단 고정: 사이트명 + 🔍 검색 · 🛒 장바구니 · ☰ 소분류 메뉴 + 대분류 칩 줄 + 소분류 표시 줄 -->
 <header id="top">
   <div class="bar">
     <a class="logo" href="#">shop</a>
     <input id="search" type="search" placeholder="search" autocomplete="off">
     <button id="sbtn" class="ibtn" type="button" aria-label="검색" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
-    <a id="cbtn" class="ibtn cartlink" href="#/cart" aria-label="장바구니"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></a>
+    <a id="cbtn" class="ibtn" href="#/cart" aria-label="장바구니"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2.2 10.5h10.8L21 7.5H6.4"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg><span id="cartn" class="badge" hidden></span></a>
     <button id="mbtn" class="ibtn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
   <div id="chips"></div>
@@ -53,7 +47,7 @@
 <!-- 상품 목록: 신상 가로줄 + 전체 (정렬) -->
 <main id="list">
   <section id="newbox" class="sec" hidden>
-    <div class="sechead"><h2>이번 주 신상</h2><span id="newno"></span></div>
+    <h2>이번 주 신상</h2>
     <div id="newrow" class="row"></div>
   </section>
   <section class="sec">
@@ -79,7 +73,6 @@
 <section id="detail" hidden>
   <div class="dbar">
     <button id="back" type="button" aria-label="back">←</button>
-    <a id="dcbtn" class="ibtn cartlink" href="#/cart" aria-label="장바구니"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></a>
   </div>
   <div class="gallery">
     <div id="slides"></div>
@@ -97,29 +90,24 @@
     <p id="pdesc"></p>
   </div>
   <div class="askbar">
-    <button id="add" type="button"><span class="al"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg>담기</span><span class="badge cartn" hidden></span></button>
-    <button id="ask" class="kbtn" type="button"><span class="al"><svg class="ic-ask" aria-hidden="true"><use href="#i-ask"/></svg>문의하기</span><small class="khint">상품 링크 자동 복사 → 채팅창에 붙여넣기</small></button>
+    <button id="add" type="button">🛒 담기<span id="addn" class="badge" hidden></span></button>
+    <button id="ask" type="button">💬 문의하기</button>
   </div>
 </section>
 
-<!-- 장바구니 페이지 (#/cart): 체크·개별 ✕ 삭제·선택 삭제·비우기·선택 문의 -->
+<!-- 장바구니 페이지 (#/cart) -->
 <section id="cartpage" hidden>
   <div class="dbar"><button id="cback" type="button" aria-label="back">←</button><h2>장바구니</h2><span></span></div>
   <div class="ctools">
     <label class="chk"><input id="call" type="checkbox"><i></i>전체 선택 <span id="cseln"></span></label>
+    <button id="cdel" type="button">선택 삭제</button>
   </div>
   <ul id="clist"></ul>
-  <div class="cbtns">
-    <button id="cdel" type="button">선택 삭제</button>
-    <button id="cclear" type="button">장바구니 비우기</button>
-  </div>
-  <div id="cempty">
-    <p>담은 상품 없음</p>
-    <a class="cshop" href="#">쇼핑 계속하기</a>
-  </div>
+  <p id="cempty">담은 상품 없음</p>
   <p class="cnote">이 휴대폰에만 저장 · 담은 지 14일 지나면 자동 삭제</p>
   <div class="askbar">
-    <button id="cgo" class="kbtn" type="button"><span class="al"><svg class="ic-ask" aria-hidden="true"><use href="#i-ask"/></svg><span id="cgot">문의하기</span></span><small class="khint">상품 링크 자동 복사 → 채팅창에 붙여넣기</small></button>
+    <p id="csum"></p>
+    <button id="cgo" type="button">💬 문의하기</button>
   </div>
 </section>
 
@@ -146,19 +134,6 @@
   <button id="vclose" type="button">닫기</button>
   <p class="vhint">두 손가락으로 확대 · 두 번 톡톡</p>
 </div>
-
-<!-- 복사 실패 시에만: 글 상자 (길게 눌러 복사) + 카톡 열기 -->
-<div id="fail" hidden>
-  <div class="sheet">
-    <h3>글을 길게 눌러 복사해 주세요</h3>
-    <textarea id="ftext" readonly></textarea>
-    <button id="fgo" type="button">카톡 열기</button>
-    <button id="fclose" type="button">닫기</button>
-  </div>
-</div>
-
-<!-- 카톡 갔다 돌아오면 5초 표시 -->
-<button id="hint" type="button" hidden>비슷한 상품 더 보기 ›</button>
 
 <div id="toast" hidden></div>
 
