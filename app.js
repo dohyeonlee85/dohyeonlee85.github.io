@@ -12,7 +12,7 @@ const CONFIG = {
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
   newCount: 20, // 신상 가로줄 상품 수
   newPool: 40,  // 신상 후보: 최근 등록 40개 중 무작위 선택
-  newAuto: 2000, // 신상 자동 넘김 간격(ms), 0 = 자동 넘김 끄기
+  newAuto: 2500, // 신상 자동 넘김 간격(ms), 0 = 자동 넘김 끄기
   newHold: 3000, // 손으로 넘긴 뒤 자동 넘김 다시 시작까지(ms)
   // ===== 기능 스위치 (true = 켜기, false = 끄기) =====
   quickAsk: true,   // 문의 1탭: 안내 팝업 없이 바로 복사 + 카톡 새 창 (false = 기존 안내 팝업)
@@ -142,17 +142,18 @@ function applyFilter() {
   window.scrollTo(0, 0);
 }
 
-// ===== 신상 가로줄: 2초마다 1장씩 왼쪽으로 자동 넘김, 끝나면 1번으로 이어짐 =====
+// ===== 신상 가로줄: 2.5초마다 1장씩 다음 카드로 자동 넘김, 끝나면 1번으로 이어짐 =====
 // 끝없이 넘기기: 뒤에 앞쪽 카드 복제 → 복제한 1번에 도착하면 진짜 1번 위치로 순간 이동
 // 손으로 밀면 멈췄다가 손 뗀 뒤 3초 후 다시 시작. 화면 밖·상세·장바구니·다른 탭이면 정지
-const nr = { row: $('#newrow'), n: 0, hold: 0, touch: false, anim: 0, seen: false };
+const nr = { row: $('#newrow'), n: 0, loop: false, hold: 0, touch: false, anim: 0, seen: false };
 function renderNew(list) {
   const row = nr.row;
   row.innerHTML = '';
   list.forEach((p) => row.appendChild(makeCard(p)));
   nr.n = list.length;
-  // 화면에 다 보이면(PC 4장 이하) 자동 넘김 없음
-  if (nr.n > 4) list.slice(0, 4).forEach((p) => {
+  // 화면에 다 보이면(PC 4장 이하, 휴대폰 1장) 자동 넘김 없음
+  nr.loop = nr.n > (matchMedia('(min-width: 700px)').matches ? 4 : 1);
+  if (nr.loop) list.slice(0, 4).forEach((p) => {
     const c = makeCard(p);
     c.tabIndex = -1;
     c.setAttribute('aria-hidden', 'true');
@@ -182,10 +183,10 @@ function slideTo(x) {
 // 복제 구간에 들어가면 같은 진짜 카드 위치로 순간 이동
 function newWrap() {
   const w = newStep();
-  if (nr.n > 4 && w && newAt() >= nr.n) nr.row.scrollLeft -= nr.n * w;
+  if (nr.loop && w && newAt() >= nr.n) nr.row.scrollLeft -= nr.n * w;
 }
 function newTick() {
-  const run = CONFIG.newAuto && nr.n > 4 && nr.seen && !nr.touch && Date.now() > nr.hold
+  const run = CONFIG.newAuto && nr.loop && nr.seen && !nr.touch && Date.now() > nr.hold
     && !document.hidden && $('#detail').hidden && $('#cartpage').hidden && $('#menu').hidden
     && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (run) slideTo((newAt() + 1) * newStep());
@@ -309,6 +310,23 @@ function openDetail(id) {
       else if (at === total + 1) box.scrollLeft = w;
     }, 150);
   };
+  // 상세 사진: 타이틀 사진 1 ~ N을 세로로 나열, 사진별 돋보기
+  const dp = $('#dphotos');
+  dp.innerHTML = '';
+  for (let n = 1; n <= total; n++) {
+    const s = document.createElement('div');
+    s.className = 'dphoto';
+    const img = document.createElement('img');
+    img.alt = '';
+    img.draggable = false;
+    img.loading = 'lazy';
+    img.onerror = () => fallback(img, `${p.id} (${n})`);
+    img.src = photoUrl(p, n);
+    const z = $('#zoomtpl').content.firstElementChild.cloneNode(true);
+    z.onclick = () => openViewer(n);
+    s.append(img, z);
+    dp.appendChild(s);
+  }
   $('#pid').textContent = 'No. ' + p.id;
   $('#pname').textContent = p.name || '';
   $('#pname').hidden = !p.name;
@@ -344,6 +362,7 @@ $('#back').onclick = () => {
   if (fromList) history.back();
   else location.hash = '';
 };
+$('#dtop').onclick = () => $('#detail').scrollTo({ top: 0, behavior: 'smooth' });
 
 function route() {
   if (location.hash === '#/cart') { closeDetail(); openCart(); return; }
@@ -629,15 +648,14 @@ vw.addEventListener('wheel', (e) => {
   zoomAt(e.clientX, e.clientY, zs.s * (e.deltaY < 0 ? 1.2 : 1 / 1.2));
 }, { passive: false });
 
-function openViewer() {
+function openViewer(n) {
   if (!current) return;
-  vimg.src = photoUrl(current, slideNo);
+  vimg.src = photoUrl(current, n);
   zs.s = 1; zs.x = 0; zs.y = 0;
   applyZoom();
   vw.hidden = false;
   history.pushState({ viewer: 1 }, '');   // 휴대폰 뒤로가기 = 닫기
 }
-$('#zoom').onclick = openViewer;
 $('#vclose').onclick = () => history.back();
 window.addEventListener('popstate', () => {
   if (vw.hidden) return;

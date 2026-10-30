@@ -115,14 +115,16 @@ input, button { font-family: inherit; }
   scroll-snap-type: x proximity; scrollbar-width: none;
 }
 .row::-webkit-scrollbar { display: none; }
-.row .card { flex: none; width: calc((100% - 6px) / 2.5); scroll-snap-align: start; }   /* 화면에 2.5장 */
+.row .card { flex: none; width: calc((100% - 6px) / 1.5); scroll-snap-align: start; }   /* 화면에 1.5장 */
 .row.moving { scroll-snap-type: none; }   /* 자동 넘김 중엔 스냅 끔 */
 #newno { font-size: 12px; color: var(--text-sub); letter-spacing: .5px; padding-top: 6px; }
 #totop {
   position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 15;
-  padding: 8px 18px; border-radius: 18px; letter-spacing: 1px;
-  background: rgba(61, 52, 48, .85); color: #fff; font-size: 13px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255, 255, 255, .9); border: 2px solid var(--dust-grey); color: var(--text-sub);
+  display: flex; align-items: center; justify-content: center;
 }
+#totop[hidden] { display: none; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 3px; }
 .card { display: block; color: var(--text); text-decoration: none; }
 .thumb { aspect-ratio: 3 / 4; background: var(--powder-petal); overflow: hidden; }
@@ -168,9 +170,9 @@ input, button { font-family: inherit; }
 .gallery { position: relative; }
 .nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 1;
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 50%;
   background: rgba(255, 255, 255, .75); color: var(--text);
-  font-size: 26px; line-height: 1; padding-bottom: 3px;
+  font-size: 19px; line-height: 1; padding-bottom: 2px;
   display: flex; align-items: center; justify-content: center;
 }
 .nav[hidden] { display: none; }
@@ -182,10 +184,21 @@ input, button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
 }
 .slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
-#zoom {
-  position: absolute; top: 8px; right: 8px; z-index: 1;
+/* 상세 사진: 타이틀과 같은 3:4 비율로 세로 나열 (비율 고정 → 지연 로딩 중 화면 밀림 방지) */
+#dphotos { flex: none; display: flex; flex-direction: column; gap: 3px; background: var(--bg); }
+.dphoto { position: relative; aspect-ratio: 3 / 4; background: var(--parchment); }
+.dphoto img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.dzoom {
+  position: absolute; top: 8px; right: 8px;
   width: 36px; height: 36px; border-radius: 50%;
   background: rgba(255, 255, 255, .75); color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+}
+/* 상세 맨 아래: TOP */
+#dend { flex: none; display: flex; justify-content: center; padding: 16px; }
+#dtop {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--dust-grey); color: var(--text-sub);
   display: flex; align-items: center; justify-content: center;
 }
 
@@ -370,3 +383,4 @@ img {
   -webkit-user-drag: none;
   pointer-events: none;   /* 사진 자체를 누를 수 없게 → 길게 누르기·우클릭 '이미지 저장' 메뉴 자체가 안 뜸 */
 }
+.card, .cthumb { -webkit-touch-callout: none; }   /* 아이폰: 상품 카드 길게 누르기 미리보기·메뉴 차단 */

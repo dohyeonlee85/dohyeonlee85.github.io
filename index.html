@@ -72,7 +72,7 @@
 </main>
 <div id="more"></div>
 <p id="empty" hidden>상품 없음</p>
-<button id="totop" type="button" hidden>TOP</button>
+<button id="totop" type="button" aria-label="맨 위로" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h12M6 16l6-6 6 6"/></svg></button>
 
 <!-- 상세 화면 -->
 <section id="detail" hidden>
@@ -84,9 +84,6 @@
     <div id="slides"></div>
     <button id="prev" class="nav" type="button" aria-label="prev">‹</button>
     <button id="next" class="nav" type="button" aria-label="next">›</button>
-    <button id="zoom" type="button" aria-label="zoom">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20M10.5 7.5v6M7.5 10.5h6"/></svg>
-    </button>
     <span id="count"></span>
   </div>
   <div class="info">
@@ -94,6 +91,12 @@
     <p id="pname"></p>
     <p id="pprice"></p>
     <p id="pdesc"></p>
+  </div>
+  <!-- 상세 사진: 타이틀 사진 세로 나열 + 맨 아래 TOP -->
+  <div id="dphotos"></div>
+  <template id="zoomtpl"><button class="dzoom" type="button" aria-label="확대"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20M10.5 7.5v6M7.5 10.5h6"/></svg></button></template>
+  <div id="dend">
+    <button id="dtop" type="button" aria-label="맨 위로"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h12M6 16l6-6 6 6"/></svg></button>
   </div>
   <div class="askbar">
     <button id="add" type="button"><span class="al"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg>담기</span><span class="badge cartn" hidden></span></button>
