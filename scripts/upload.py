@@ -5,8 +5,8 @@
   shop03·04: '업로드03'·'업로드04' 폴더 → 같은 이름 탭 → 각 Firebase(Firestore) 상품으로 등록
 묶기: 사진 파일 이름 = 저장 시각(1000분의 1초). 앞 사진과 GAP_MS 이상 벌어지면 다음 상품.
 공개: '분류'를 고른 줄만 사이트에 반영. 분류를 지우면 사이트에서 내림.
-대표: '대표' 칸에 사진 번호 → 그 사진을 1번·썸네일로, '역순' → 전체 순서 뒤집기. 처리 후 칸 비움.
-  shop03·04: 사진을 처음부터 파일 이름 역순으로 올림. '오름차순' → 파일 이름 순서로 뒤집기 ('역순'은 칸만 비움).
+대표: '대표' 칸에 사진 번호 → 그 사진을 1번·썸네일로. 처리 후 칸 비움.
+  사진을 처음부터 파일 이름 역순으로 올림. '오름차순' → 파일 이름 순서로 뒤집기 ('역순'은 칸만 비움).
 정리: 업로드 후 KEEP_UNSORTED_DAYS일 지나도 분류 없는 줄 → 줄·R2 사진 삭제.
 처리한 사진은 '파일' 열에 기록 (Apps Script가 '완료' 폴더로 옮김).
 """
@@ -244,8 +244,8 @@ def process_new(sheets, drive, r2, sid, base, used, site):
     for files in group(new):
         pid = next_id(today, used)
         try:
-            # shop03·04: 기본 역순 (파일 이름 마지막 사진 → 1번)
-            upload_group(r2, site['prefix'] + pid, files[::-1] if is_fb(site) else files)
+            # 기본 역순 (파일 이름 마지막 사진 → 1번)
+            upload_group(r2, site['prefix'] + pid, files[::-1])
         except Exception as e:  # 실패한 묶음은 다음 실행 때 다시 시도
             print(f'{site["name"]} 업로드 묶음 실패 ({files[0]["name"]} 외 {len(files) - 1}장): {e}')
             failed += 1
@@ -293,12 +293,12 @@ def reverse_photos(r2, key, photos):
 
 
 def apply_covers(sheets, r2, sid, base, site):
-    """대표 칸: 숫자 = 그 사진을 1번·썸네일로, 뒤집기 값('역순', shop03·04는 '오름차순') = 전체 순서 뒤집기.
+    """대표 칸: 숫자 = 그 사진을 1번·썸네일로, '오름차순' = 전체 순서 뒤집기.
 
     처리 후 칸 비움. 시트 기록은 뒤집기 1개마다 바로 함 (오래 걸려도 연결 안 끊기게, 실패해도 다시 안 뒤집게).
     """
     header, rows, get = read_tab(sheets, sid, site)
-    flip = '오름차순' if is_fb(site) else '역순'
+    flip = '오름차순'
     updates = []
 
     def flush():
@@ -315,7 +315,7 @@ def apply_covers(sheets, r2, sid, base, site):
         num = int(float(want)) if re.fullmatch(r'\d+(\.0)?', want) else 0
         if want == flip and photos >= 2:
             job, done = (lambda: reverse_photos(r2, key, photos)), '전체 순서 뒤집기'
-        elif is_fb(site) and want == '역순':   # 이미 기본값(역순) → 칸만 비움 (썸네일 새로 읽게 버전 +1)
+        elif want == '역순':   # 이미 기본값(역순) → 칸만 비움 (썸네일 새로 읽게 버전 +1)
             job, done = None, '역순(기본값) 칸 정리'
         elif 2 <= num <= photos:
             job, done = (lambda: set_cover(r2, key, num)), f'대표 → {num}번 사진'
