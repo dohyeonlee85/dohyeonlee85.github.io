@@ -31,13 +31,13 @@ KST = timezone(timedelta(hours=9))
 HEADER = [ID_HEADER, '썸네일', '사진수', '분류', '상품명', '가격', '설명', '상태', '파일', '대표', '버전']
 SYNCED = '반영'           # Firebase 사이트: 마지막으로 사이트에 보낸 값 (자동 기록, 손대지 않음)
 CATS = {
-    '여성-상의': ('clothes-women', 'top'), '여성-하의': ('clothes-women', 'bottom'),
-    '여성-아우터': ('clothes-women', 'outer'), '여성-기타': ('clothes-women', 'etc'),
-    '남성-상의': ('clothes-men', 'top'), '남성-하의': ('clothes-men', 'bottom'),
-    '남성-아우터': ('clothes-men', 'outer'), '남성-기타': ('clothes-men', 'etc'),
-    '신발-슬리퍼': ('shoes', 'slippers'), '신발-부츠': ('shoes', 'boots'),
-    '가방': ('bags', ''),
-    # 옛 분류값: shoes 탭(all)에만 표시 → 신발-슬리퍼/부츠로 바꾼 뒤 삭제 가능
+    '패딩-여성': ('padding', 'women'), '패딩-남성': ('padding', 'men'),
+    '코트-여성': ('coat', 'women'), '코트-남성': ('coat', 'men'),
+    '신발-부츠': ('shoes', 'boots'), '신발-슬라이드': ('shoes', 'slides'), '신발-플랫': ('shoes', 'flats'),
+    '신발-로퍼': ('shoes', 'loafers'), '신발-힐': ('shoes', 'heels'), '신발-스니커즈': ('shoes', 'sneakers'),
+    '신발-기타': ('shoes', 'etc'),
+    '머플러': ('muffler', ''),
+    # 옛 분류값: shoes 탭(all)에만 표시 → 신발-부츠 등으로 바꾼 뒤 삭제 가능
     '여성-신발': ('shoes', ''), '남성-신발': ('shoes', ''),
 }
 SITES = [

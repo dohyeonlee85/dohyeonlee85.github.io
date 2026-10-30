@@ -2,12 +2,12 @@
 const CONFIG = {
   dataUrl: 'products.json',
   kakaoUrl: 'http://pf.kakao.com/_TcxlBX/chat',
-  cat1: ['all', 'clothes-women', 'clothes-men', 'shoes', 'bags'],
+  cat1: ['all', 'padding', 'coat', 'shoes', 'muffler'],
   // 대분류별 소분류 (여기 없는 대분류는 소분류 탭 숨김)
   sub: {
-    'clothes-women': ['top', 'bottom', 'outer', 'etc'],
-    'clothes-men': ['top', 'bottom', 'outer', 'etc'],
-    shoes: ['slippers', 'boots'],
+    padding: ['women', 'men'],
+    coat: ['women', 'men'],
+    shoes: ['boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers', 'etc'],
   },
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
   newCount: 20, // 신상 가로줄 상품 수
