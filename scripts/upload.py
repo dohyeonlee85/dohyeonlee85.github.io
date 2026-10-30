@@ -6,6 +6,7 @@
 묶기: 사진 파일 이름 = 저장 시각(1000분의 1초). 앞 사진과 GAP_MS 이상 벌어지면 다음 상품.
 공개: '분류'를 고른 줄만 사이트에 반영. 분류를 지우면 사이트에서 내림.
 대표: '대표' 칸에 사진 번호 → 그 사진을 1번·썸네일로, '역순' → 전체 순서 뒤집기. 처리 후 칸 비움.
+  shop03·04: 사진을 처음부터 파일 이름 역순으로 올림. '오름차순' → 파일 이름 순서로 뒤집기 ('역순'은 칸만 비움).
 정리: 업로드 후 KEEP_UNSORTED_DAYS일 지나도 분류 없는 줄 → 줄·R2 사진 삭제.
 처리한 사진은 '파일' 열에 기록 (Apps Script가 '완료' 폴더로 옮김).
 """
@@ -243,7 +244,8 @@ def process_new(sheets, drive, r2, sid, base, used, site):
     for files in group(new):
         pid = next_id(today, used)
         try:
-            upload_group(r2, site['prefix'] + pid, files)
+            # shop03·04: 기본 역순 (파일 이름 마지막 사진 → 1번)
+            upload_group(r2, site['prefix'] + pid, files[::-1] if is_fb(site) else files)
         except Exception as e:  # 실패한 묶음은 다음 실행 때 다시 시도
             print(f'{site["name"]} 업로드 묶음 실패 ({files[0]["name"]} 외 {len(files) - 1}장): {e}')
             failed += 1
@@ -291,9 +293,19 @@ def reverse_photos(r2, key, photos):
 
 
 def apply_covers(sheets, r2, sid, base, site):
-    """대표 칸: 숫자 = 그 사진을 1번·썸네일로, '역순' = 전체 순서 뒤집기. 처리 후 칸 비움."""
+    """대표 칸: 숫자 = 그 사진을 1번·썸네일로, 뒤집기 값('역순', shop03·04는 '오름차순') = 전체 순서 뒤집기.
+
+    처리 후 칸 비움. 시트 기록은 뒤집기 1개마다 바로 함 (오래 걸려도 연결 안 끊기게, 실패해도 다시 안 뒤집게).
+    """
     header, rows, get = read_tab(sheets, sid, site)
+    flip = '오름차순' if is_fb(site) else '역순'
     updates = []
+
+    def flush():
+        if updates:
+            sheets.spreadsheets().values().batchUpdate(spreadsheetId=sid, body={
+                'valueInputOption': 'USER_ENTERED', 'data': updates}).execute()
+            updates.clear()
     for n, r in rows:
         want = get(r, '대표')
         if not want:
@@ -301,28 +313,31 @@ def apply_covers(sheets, r2, sid, base, site):
         pid, photos = get(r, ID_HEADER), int(float(get(r, '사진수') or 0))
         key = site['prefix'] + pid
         num = int(float(want)) if re.fullmatch(r'\d+(\.0)?', want) else 0
-        if want == '역순' and photos >= 2:
-            job, done = (lambda: reverse_photos(r2, key, photos)), '전체 역순'
+        if want == flip and photos >= 2:
+            job, done = (lambda: reverse_photos(r2, key, photos)), '전체 순서 뒤집기'
+        elif is_fb(site) and want == '역순':   # 이미 기본값(역순) → 칸만 비움 (썸네일 새로 읽게 버전 +1)
+            job, done = None, '역순(기본값) 칸 정리'
         elif 2 <= num <= photos:
             job, done = (lambda: set_cover(r2, key, num)), f'대표 → {num}번 사진'
         else:
             if num != 1:
-                print(f'{pid} 대표 칸 확인 필요: {want} (1~{photos} 또는 역순)')
+                print(f'{pid} 대표 칸 확인 필요: {want} (1~{photos} 또는 {flip})')
             updates.append({'range': cell(site, header, '대표', n), 'values': [['']]})
             continue
-        try:
-            job()
-        except Exception as e:  # 다음 실행 때 다시 시도 (칸 유지)
-            print(f'{pid} 사진 순서 변경 실패: {e}')
-            continue
+        if job:
+            try:
+                job()
+            except Exception as e:  # 다음 실행 때 다시 시도 (칸 유지)
+                print(f'{pid} 사진 순서 변경 실패: {e}')
+                continue
         v = int(float(get(r, '버전') or 0)) + 1
         updates += [{'range': cell(site, header, '버전', n), 'values': [[v]]},
                     {'range': cell(site, header, '썸네일', n), 'values': [[thumb_formula(base, site, pid, v)]]},
                     {'range': cell(site, header, '대표', n), 'values': [['']]}]
+        if job:
+            flush()
         print(f'{site["name"]} {pid} {done}')
-    if updates:
-        sheets.spreadsheets().values().batchUpdate(spreadsheetId=sid, body={
-            'valueInputOption': 'USER_ENTERED', 'data': updates}).execute()
+    flush()
 
 
 def delete_r2(r2, key):
@@ -464,6 +479,7 @@ def run(sheets, drive, r2, sid, data, used):
     fs = None
     for site in SITES[1:]:
         try:   # 한 사이트 문제가 다른 사이트를 막지 않게
+            sheets, drive = google_services()   # 사이트마다 새 연결 (오래 쉰 연결 끊김 방지)
             fs = fs or firestore.client()
             site_used = tab_ids(sheets, sid, site)
             a, f = process_new(sheets, drive, r2, sid, data['base'], site_used, site)
