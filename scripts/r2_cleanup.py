@@ -1,6 +1,6 @@
 """1회용: shop01 초기화 후 R2에 남은 옛 사진 삭제. 기본은 미리보기 (R2_CLEAN_MODE=delete일 때만 삭제).
 
-삭제 대상: 버킷 맨 위의 상품번호 폴더(예: 261025-57/) 중 초기화 전 번호이고 products.json·업로드 탭에 없는 것.
+삭제 대상: 버킷 맨 위의 상품번호 폴더(예: 261025-57/) 중 LAST_DAY 이하 번호이고 products.json·업로드 탭에 없는 것.
 shop03/·shop04/ 폴더는 이름 규칙에 안 맞아 대상에서 제외. 삭제 전후 파일 수를 출력해 확인.
 """
 import json
@@ -10,7 +10,7 @@ import re
 from sync import JSON_PATH, google_services, r2_client
 from upload import bucket, delete_r2, tab_ids
 
-RESET_DAY = '261031'      # 이 날짜 이후 번호는 재업로드 상품 → 삭제 안 함
+LAST_DAY = '261029'       # 이 날짜까지의 번호만 삭제 (이후 번호는 삭제 안 함)
 ID_RE = re.compile(r'^(\d{6})-\d+$')
 KEEP_PREFIXES = ('shop03/', 'shop04/')
 
@@ -21,7 +21,7 @@ def old_ids(r2, keep):
         for p in page.get('CommonPrefixes', []):
             name = p['Prefix'].rstrip('/')
             m = ID_RE.match(name)
-            if m and m.group(1) < RESET_DAY and name not in keep:
+            if m and m.group(1) <= LAST_DAY and name not in keep:
                 found.append(name)
     return sorted(found)
 
