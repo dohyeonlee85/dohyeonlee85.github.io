@@ -194,12 +194,24 @@ input, button { font-family: inherit; }
   background: rgba(255, 255, 255, .75); color: var(--text);
   display: flex; align-items: center; justify-content: center;
 }
-/* 상세 맨 아래: TOP */
-#dend { flex: none; display: flex; justify-content: center; padding: 16px; }
-#dtop {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #fff; border: 2px solid var(--dust-grey); color: var(--text-sub);
-  display: flex; align-items: center; justify-content: center;
+/* 상세 맨 아래: 같은 카테고리 추천 */
+#rec { flex: none; padding: 20px 0 16px; scroll-margin-top: 50px; }
+#rec[hidden] { display: none; }
+#rec h2 { padding: 0 12px 8px; }
+.recwrap { position: relative; }
+#recrow .card { width: calc((100% - 9px) / 3.5); }   /* 휴대폰 3.5장 */
+#recprev, #recnext { display: none; }
+#recall {
+  display: block; width: calc(100% - 24px); height: 44px; margin: 12px 12px 0;
+  border: 1px solid var(--dust-grey); border-radius: 10px; font-size: 14px; font-weight: 600;
+}
+#recgo { align-self: flex-start; padding: 2px 0; font-size: 13px; color: var(--text-sub); text-decoration: underline; }
+#recgo[hidden] { display: none; }
+@media (min-width: 700px) {
+  #recrow .card { width: calc((100% - 30px) / 5.5); }   /* PC 5.5장 */
+  #recprev, #recnext { display: flex; width: 34px; height: 34px; }
+  #recprev { left: 8px; }
+  #recnext { right: 8px; }
 }
 
 /* 확대 보기 */

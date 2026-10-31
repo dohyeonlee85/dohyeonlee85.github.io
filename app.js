@@ -10,8 +10,9 @@ const CONFIG = {
     shoes: ['boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers', 'etc'],
   },
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
-  newCount: 20, // 신상 가로줄 상품 수
-  newPool: 40,  // 신상 후보: 최근 등록 40개 중 무작위 선택
+  newCount: 25, // 신상 가로줄 상품 수 (카테고리 상품이 이 수 이하이면 가로줄 숨김)
+  newPool: 50,  // 신상 후보 수 (전체 화면: 대분류별 최신 상품을 번갈아 선정)
+  recCount: 12, // 상세 하단 같은 카테고리 추천 수
   newAuto: 2500, // 신상 자동 넘김 간격(ms), 0 = 자동 넘김 끄기
   newHold: 3000, // 손으로 넘긴 뒤 자동 넘김 다시 시작까지(ms)
   // ===== 기능 스위치 (true = 켜기, false = 끄기) =====
@@ -135,11 +136,50 @@ function applyFilter() {
     (state.cat2 === 'all' || p.cat2 === state.cat2) &&
     (!q || [p.id, p.name, p.desc].join(' ').toLowerCase().includes(q))
   );
-  // 신상 가로줄: 최근 등록 40개 중 무작위 20개, 접속할 때마다 바뀜 (검색 중엔 숨김)
-  renderNew(q ? [] : shuffle(filtered.slice(0, CONFIG.newPool)).slice(0, CONFIG.newCount));
+  // 신상 가로줄: 검색 중엔 숨김
+  renderNew(q ? [] : newList());
   showCrumb();
   renderGrid();
   window.scrollTo(0, 0);
+}
+
+// ===== 신상·추천 선정 결과: 페이지를 떠날 때까지 유지 =====
+// 재접속·새로고침 = 새로 뽑기. 문의로 카톡 갔다 복귀하면 페이지가 다시 열려도 유지
+const KEEP_KEY = 'keeppicks';
+let newPicks = {}, recPicks = {};   // 신상: {'대분류/소분류': [상품번호]}, 추천: {상품번호: [상품번호]}
+try {
+  const k = JSON.parse(sessionStorage.getItem(KEEP_KEY));
+  if (k) { newPicks = k.n || {}; recPicks = k.r || {}; }
+  sessionStorage.removeItem(KEEP_KEY);
+} catch (e) {}
+function keepPicks() {
+  try { sessionStorage.setItem(KEEP_KEY, JSON.stringify({ n: newPicks, r: recPicks })); } catch (e) {}
+}
+function keepClear() {
+  if (document.hidden) return;
+  try { sessionStorage.removeItem(KEEP_KEY); } catch (e) {}
+}
+document.addEventListener('visibilitychange', keepClear);
+window.addEventListener('pageshow', keepClear);
+
+// 신상 후보: 전체 화면은 대분류별 최신 상품을 번갈아, 나머지는 최신순
+function newPool() {
+  if (state.cat1 !== 'all') return filtered.slice(0, CONFIG.newPool);
+  const by = new Map();
+  filtered.forEach((p) => { if (!by.has(p.cat1)) by.set(p.cat1, []); by.get(p.cat1).push(p); });
+  const lists = [...by.values()], pool = [];
+  for (let i = 0; pool.length < CONFIG.newPool && lists.some((l) => i < l.length); i++) {
+    lists.forEach((l) => { if (i < l.length && pool.length < CONFIG.newPool) pool.push(l[i]); });
+  }
+  return pool;
+}
+function newList() {
+  const key = state.cat1 + '/' + state.cat2;
+  if (!newPicks[key]) {
+    newPicks[key] = filtered.length > CONFIG.newCount
+      ? shuffle(newPool()).slice(0, CONFIG.newCount).map((p) => p.id) : [];
+  }
+  return newPicks[key].map((id) => findItem(id)).filter(Boolean);
 }
 
 // ===== 신상 가로줄: 2.5초마다 1장씩 다음 카드로 자동 넘김, 끝나면 1번으로 이어짐 =====
@@ -334,6 +374,7 @@ function openDetail(id) {
   $('#pprice').hidden = !showPrice(p);
   $('#pdesc').textContent = p.desc || '';
   $('#pdesc').hidden = !p.desc;
+  renderRec(p);
   $('#detail').hidden = false;
   $('#detail').scrollTop = 0;
   // 인기순용 조회 기록 (GA4 → Actions가 하루 1회 products.json에 반영)
@@ -341,6 +382,43 @@ function openDetail(id) {
   box.scrollLeft = loop ? box.clientWidth : 0;   // 화면 표시 후 1번 사진 위치로
   document.body.style.overflow = 'hidden';
 }
+
+// ===== 상세 하단 같은 카테고리 추천: 같은 소분류 무작위, 부족하면 같은 대분류로 채움 =====
+// 담은 상품·문의한 상품 제외 (이미 뽑은 상품 화면은 그대로, 다음에 여는 상품부터 반영)
+function recList(p) {
+  if (!recPicks[p.id]) {
+    const skip = new Set([p.id, ...cart.map((c) => c.id), ...askedGet()]);
+    const rest = state.items.filter((x) => x.cat1 === p.cat1 && !skip.has(x.id));
+    const same = shuffle(rest.filter((x) => x.cat2 === p.cat2));
+    const near = shuffle(rest.filter((x) => x.cat2 !== p.cat2));
+    recPicks[p.id] = [...same, ...near].slice(0, CONFIG.recCount).map((x) => x.id);
+  }
+  return recPicks[p.id].map((id) => findItem(id)).filter(Boolean);
+}
+function renderRec(p) {
+  const list = recList(p), row = $('#recrow');
+  row.innerHTML = '';
+  list.forEach((x) => {
+    const c = makeCard(x);
+    c.addEventListener('click', () => {
+      if (window.gtag) gtag('event', 'select_item', { item_list_name: 'detail_rec', items: [{ item_id: x.id, item_name: x.name || x.id }] });
+    });
+    row.appendChild(c);
+  });
+  row.scrollLeft = 0;
+  $('#rec').hidden = $('#recgo').hidden = !list.length;
+}
+const recBy = (d) => $('#recrow').scrollBy({ left: d * $('#recrow').clientWidth * 0.8, behavior: 'smooth' });
+$('#recprev').onclick = () => recBy(-1);
+$('#recnext').onclick = () => recBy(1);
+// 바로가기: 애니메이션 없이 즉시 이동 (지나가는 상세 사진을 불러오지 않음)
+$('#recgo').onclick = () => $('#rec').scrollIntoView({ behavior: 'instant', block: 'start' });
+// 이 상품의 카테고리 목록으로 이동 (소분류 있으면 소분류, 없으면 대분류 전체)
+function goCatOf(p) {
+  location.hash = '';
+  setCat(p.cat1, CONFIG.sub[p.cat1] && CONFIG.sub[p.cat1].includes(p.cat2) ? p.cat2 : 'all');
+}
+$('#recall').onclick = () => { if (current) goCatOf(current); };
 
 function closeDetail() {
   current = null;
@@ -362,7 +440,6 @@ $('#back').onclick = () => {
   if (fromList) history.back();
   else location.hash = '';
 };
-$('#dtop').onclick = () => $('#detail').scrollTo({ top: 0, behavior: 'smooth' });
 
 function route() {
   if (location.hash === '#/cart') { closeDetail(); openCart(); return; }
@@ -449,6 +526,7 @@ function askDone(ps) {
   ps.forEach((p) => a.add(p.id));
   try { localStorage.setItem(ASK_KEY, JSON.stringify([...a].slice(-300))); } catch (e) {}
   try { sessionStorage.setItem('askback', ps[0].id); } catch (e) {}   // 복귀 안내용
+  keepPicks();   // 카톡 복귀 시 신상·추천 유지
   ga('kakao_inquiry', ps);
   if (!$('#cartpage').hidden) renderCart();
 }
@@ -481,8 +559,8 @@ function backHint() {
   h.onclick = () => {
     h.hidden = true;
     const p = findItem(id);
-    location.hash = '';
-    if (p) setCat(p.cat1, CONFIG.sub[p.cat1] && CONFIG.sub[p.cat1].includes(p.cat2) ? p.cat2 : 'all');
+    if (p) goCatOf(p);
+    else location.hash = '';
   };
   clearTimeout(backHint.t);
   backHint.t = setTimeout(() => { h.hidden = true; }, 5000);
@@ -676,7 +754,7 @@ fetch(CONFIG.dataUrl, { cache: 'no-cache' })
   .then((data) => {
     state.base = (data.base || '').replace(/\/$/, '');
     state.items = (data.items || [])
-      .sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+      .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id, undefined, { numeric: true }));   // 최신 날짜 → 큰 번호 (100번 이상도 숫자로 비교)
     // 상품명 있는 상품이 하나라도 있을 때만 🔍 표시
     $('#sbtn').hidden = !state.items.some((p) => p.name);
     // 조회 기록이 아직 없으면 인기순 숨김
