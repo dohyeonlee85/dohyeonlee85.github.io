@@ -2,7 +2,7 @@
 
 사이트별로 폴더·탭을 따로 씀 (SITES):
   shop01: '업로드' 폴더 → '업로드' 탭 → products.json
-  shop03·04: '업로드03'·'업로드04' 폴더 → 같은 이름 탭 → 각 Firebase(Firestore) 상품으로 등록
+  shop03·04·05: '업로드03'·'업로드04'·'업로드05' 폴더 → 같은 이름 탭 → 각 Firebase(Firestore) 상품으로 등록
 묶기: 사진 파일 이름 = 저장 시각(1000분의 1초). 앞 사진과 GAP_MS 이상 벌어지면 다음 상품.
 공개: '분류'를 고른 줄만 사이트에 반영. 분류를 지우면 사이트에서 내림.
 대표: '대표' 칸에 사진 번호 → 그 사진을 1번·썸네일로. 처리 후 칸 비움.
@@ -55,6 +55,10 @@ SITES = [
               ('Shoes', 'Slippers & Slides'), ('Shoes', 'Sneakers'),
               ('Accessories', 'belt'), ('Accessories', 'cap'), ('Accessories', 'muffler'),
               ('Watches', ''), ('clothes_women', 'outer'), ('clothes_men', '')]},
+    {'name': 'shop05', 'folder': '업로드05', 'tab': '업로드05', 'prefix': 'shop05/',
+     'project': 'shop05-7a786', 'cat_tab': '분류05',
+     'cats': [('Jewelry', 'Bracelet'), ('Jewelry', 'Necklace'), ('Jewelry', 'Earrings'),
+              ('Jewelry', 'Ring'), ('Jewelry', 'Jewelry Accessories')]},
 ]
 UPLOAD_TAB = SITES[0]['tab']   # storage.py에서 사용
 CAT_SEP = ' / '                # 분류 표시: '대분류 / 소분류'

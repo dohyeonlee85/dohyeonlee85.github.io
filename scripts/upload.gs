@@ -1,5 +1,5 @@
 // shop 사진 일괄 업로드 (시트 "shop 상품 목록"에 연결된 Apps Script, realtime.gs·storage.gs와 같은 프로젝트)
-// 사이트별 폴더·탭: shop01 '업로드' / shop03 '업로드03' / shop04 '업로드04' (03·04 폴더는 '업로드' 폴더 안에 자동 생성)
+// 사이트별 폴더·탭: shop01 '업로드' / shop03 '업로드03' / shop04 '업로드04' / shop05 '업로드05' (03·04·05 폴더는 '업로드' 폴더 안에 자동 생성)
 // 5분마다: 업로드 폴더에 새 사진이 있고 3분간 추가 업로드가 없으면 → Actions 실행 (상품별 묶기·등록)
 // 업로드 탭에서 분류·상품명 등을 고치면 → 2분간 수정이 없을 때 Actions 실행 (사이트 반영)
 // 처리 끝난 사진은 각 폴더의 '완료' 폴더로 이동, keepDays일 지나면 영구 삭제 (사이트 사진은 R2에 영구 보관)
@@ -9,6 +9,7 @@ const SITES = [
   { folder: '업로드', tab: '업로드', keepDays: 120 },
   { folder: '업로드03', tab: '업로드03', parent: '업로드', keepDays: 3 },
   { folder: '업로드04', tab: '업로드04', parent: '업로드', keepDays: 3 },
+  { folder: '업로드05', tab: '업로드05', parent: '업로드', keepDays: 3 },
 ];
 const DONE_FOLDER = '완료';
 const QUIET_MIN = 3;        // 마지막 업로드 후 대기 (업로드 도중 실행 방지)
@@ -23,7 +24,7 @@ function installUpload() {
   ScriptApp.newTrigger('checkUpload').timeBased().everyMinutes(5).create();
   ScriptApp.newTrigger('onUploadEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   ScriptApp.newTrigger('cleanOriginals').timeBased().everyDays(1).atHour(5).create();
-  SITES.forEach(s => uploadFolder(s));   // 업로드03·04 폴더 없으면 만들기
+  SITES.forEach(s => uploadFolder(s));   // 업로드03·04·05 폴더 없으면 만들기
   checkUpload();   // 시험 실행 (실행 로그에 '업로드 확인' 표시되면 성공)
 }
 
