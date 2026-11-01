@@ -42,9 +42,8 @@ input, button { font-family: inherit; }
 /* 상세·장바구니 상단 오른쪽 버튼: .bar와 같은 간격 */
 .tbtns { display: flex; gap: 8px; }
 #ccbtn { cursor: default; }
-/* 스크롤바 유무와 무관하게 상단 버튼 위치 고정 */
-html { scrollbar-gutter: stable both-edges; }
-#detail, #cartpage { scrollbar-width: none; }
+/* 휴대폰: 스크롤바 숨김 (패드·PC는 아래 700px 이상 구간에서 표시) */
+html, #detail, #cartpage { scrollbar-width: none; }
 /* 🔍 누르면 로고 자리에 검색창 펼침 */
 #search { display: none; }
 .bar.searching .logo { display: none; }
@@ -153,6 +152,8 @@ html { scrollbar-gutter: stable both-edges; }
   .row { gap: 6px; padding: 0 12px; scroll-padding: 0 12px; }
   .row .card { width: calc((100% - 18px) / 3.5); }   /* PC 3.5장 */
   main, header, #detail, #cartpage { max-width: 1100px; margin: 0 auto; }
+  /* 패드·PC: 스크롤바 표시, 양쪽 폭 확보로 화면별 상단 버튼 위치 고정 (--sbw: app.js에서 측정) */
+  html, #detail, #cartpage { scrollbar-width: auto; scrollbar-gutter: stable both-edges; }
 }
 
 /* 상세 화면 */
@@ -279,6 +280,9 @@ html { scrollbar-gutter: stable both-edges; }
   font-family: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
 }
 #cartpage[hidden] { display: none; }
+@media (min-width: 700px) {
+  #detail, #cartpage { inset: 0 calc(-1 * var(--sbw, 0px)); max-width: calc(1100px + 2 * var(--sbw, 0px)); }
+}
 #cartpage .dbar h2 { position: absolute; left: 50%; transform: translateX(-50%); font-size: 17px; font-weight: 700; }
 #cback { width: 38px; }
 #cback { font-size: 22px; text-align: left; padding: 0 8px; }

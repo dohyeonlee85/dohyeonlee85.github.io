@@ -22,6 +22,16 @@ const CONFIG = {
 };
 
 const $ = (s) => document.querySelector(s);
+// 스크롤바 폭 측정 → CSS --sbw (패드·PC 상단 버튼 위치 보정)
+(() => {
+  const o = document.createElement('div'), i = document.createElement('div');
+  o.style.cssText = 'position:absolute;top:-99px;width:99px;height:9px;overflow:scroll;scrollbar-width:auto';
+  o.appendChild(i);
+  document.body.appendChild(o);
+  const w = o.getBoundingClientRect().width - i.getBoundingClientRect().width;
+  o.remove();
+  document.documentElement.style.setProperty('--sbw', w + 'px');
+})();
 const state = { base: '', items: [], view: [], shown: 0, cat1: 'all', cat2: 'all', q: '', sort: 'new' };
 
 // ===== 사진 주소 규칙: {base}/{상품번호}/thumb.webp, 1.webp ~ N.webp =====
