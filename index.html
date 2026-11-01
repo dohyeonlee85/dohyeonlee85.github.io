@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>shop</title>
+<title>SHOP</title>
 <!-- 웹폰트: 영문·숫자 EB Garamond(세리프) + 한글 Pretendard (필요한 글자만 내려받음) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=261101">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TEC8Z6SS5Z"></script>
 <script>
@@ -25,28 +25,31 @@
 <!-- 아이콘 (장바구니): <use href="#i-cart">로 재사용, 색은 글자색 따라감 -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <symbol id="i-cart" viewBox="16 25 600 570"><path transform="translate(0,603) scale(.1,-.1)" d="M252 5770 c-106 -25 -132 -167 -43 -227 33 -22 41 -23 271 -23 131 0 261 -5 291 -10 66 -13 119 -48 148 -100 16 -29 265 -744 366 -1055 8 -22 84 -247 170 -500 152 -448 271 -796 393 -1157 l60 -177 -71 -34 c-278 -132 -401 -441 -290 -727 61 -158 190 -277 363 -336 53 -18 117 -19 1897 -19 l1843 0 30 31 c57 56 56 135 0 189 l-31 30 -1827 5 -1827 5 -57 28 c-233 114 -226 451 11 561 l46 21 1580 5 1580 5 57 22 c117 45 216 130 268 233 16 31 177 525 350 1075 21 66 86 271 145 455 199 622 188 585 181 632 -9 61 -44 117 -94 153 l-44 30 -2320 5 -2321 5 -99 290 c-54 160 -110 314 -125 342 -37 74 -137 167 -218 204 -37 17 -97 34 -138 39 -86 11 -498 11 -545 0z m5625 -1154 c-3 -8 -33 -99 -66 -203 -32 -103 -80 -253 -106 -333 -26 -80 -60 -188 -77 -240 -62 -196 -242 -763 -310 -974 -66 -206 -73 -222 -113 -261 -33 -33 -55 -46 -96 -55 -40 -8 -435 -10 -1494 -8 l-1440 3 -92 270 c-97 287 -172 509 -436 1285 -90 267 -168 495 -171 508 l-7 22 2206 0 c1898 0 2206 -2 2202 -14z M2210 1297 c-106 -32 -184 -79 -266 -162 -245 -246 -242 -625 5 -875 121 -123 267 -183 441 -183 288 1 531 192 605 478 19 76 19 214 0 290 -56 222 -235 403 -452 459 -90 24 -240 20 -333 -7z m332 -269 c200 -93 270 -349 146 -534 -122 -181 -380 -211 -541 -64 -155 142 -166 363 -25 516 79 86 151 115 278 111 68 -2 97 -8 142 -29z M4735 1301 c-244 -70 -427 -283 -453 -527 -33 -304 143 -577 432 -670 109 -35 257 -37 361 -4 170 53 311 171 384 322 175 362 -18 782 -407 883 -80 20 -239 19 -317 -4z m321 -274 c93 -47 158 -119 190 -209 23 -65 20 -181 -7 -253 -31 -83 -121 -173 -204 -204 -80 -31 -188 -31 -265 -2 -75 28 -158 104 -195 177 -28 54 -30 67 -30 164 0 89 4 112 23 151 46 92 120 158 220 196 24 9 68 12 127 10 73 -3 99 -8 141 -30z"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
 </svg>
 
 <!-- 상단 고정: 사이트명 + 🔍 검색 · 🛒 장바구니(배지) · ☰ 소분류 메뉴 + 대분류 칩 줄 + 소분류 표시 줄 -->
 <header id="top">
   <div class="bar">
-    <a class="logo" href="#">shop</a>
+    <a class="logo" href="#">SHOP</a>
     <input id="search" type="search" placeholder="search" autocomplete="off">
     <button id="sbtn" class="ibtn" type="button" aria-label="검색" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
     <a id="cbtn" class="ibtn cartlink" href="#/cart" aria-label="장바구니"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></a>
-    <button id="mbtn" class="ibtn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <button class="ibtn mbtn" type="button" aria-label="메뉴"><svg class="icm" aria-hidden="true"><use href="#i-menu"/></svg></button>
   </div>
   <div id="chips"></div>
   <div id="crumb" hidden><span id="crumbt"></span><button id="crumbx" type="button" aria-label="전체 보기">✕</button></div>
 </header>
 
-<!-- ☰ 전체 화면 메뉴: 대분류별 소분류 -->
+<!-- ☰ 왼쪽 슬라이드 메뉴: 대분류별 소분류 (바깥 터치 = 닫기) -->
 <nav id="menu" hidden>
-  <div class="mbar">
-    <span id="mtitle">menu</span>
-    <button id="mclose" type="button" aria-label="닫기">✕</button>
+  <div class="mpanel">
+    <div class="mbar">
+      <span id="mtitle">menu</span>
+      <button id="mclose" type="button" aria-label="닫기">✕</button>
+    </div>
+    <ul id="mlist"></ul>
   </div>
-  <ul id="mlist"></ul>
 </nav>
 
 <!-- 상품 목록: 신상 가로줄 + 전체 (정렬) -->
@@ -78,7 +81,10 @@
 <section id="detail" hidden>
   <div class="dbar">
     <button id="back" type="button" aria-label="back">←</button>
-    <a id="dcbtn" class="ibtn cartlink" href="#/cart" aria-label="장바구니"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></a>
+    <div class="tbtns">
+      <a id="dcbtn" class="ibtn cartlink" href="#/cart" aria-label="장바구니"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></a>
+      <button class="ibtn mbtn" type="button" aria-label="메뉴"><svg class="icm" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    </div>
   </div>
   <div class="gallery">
     <div id="slides"></div>
@@ -91,7 +97,6 @@
     <p id="pname"></p>
     <p id="pprice"></p>
     <p id="pdesc"></p>
-    <button id="recgo" type="button" hidden>같은 카테고리 보기 ↓</button>
   </div>
   <!-- 상세 사진: 타이틀 사진 세로 나열 -->
   <div id="dphotos"></div>
@@ -104,7 +109,6 @@
       <button id="recprev" class="nav" type="button" aria-label="이전 추천">‹</button>
       <button id="recnext" class="nav" type="button" aria-label="다음 추천">›</button>
     </div>
-    <button id="recall" type="button">이 카테고리 전체 보기</button>
   </section>
   <div class="askbar">
     <button id="add" type="button"><span class="al"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg>담기</span><span class="badge cartn" hidden></span></button>
@@ -114,7 +118,12 @@
 
 <!-- 장바구니 페이지 (#/cart): 체크·개별 ✕ 삭제·선택 삭제·비우기·선택 문의 -->
 <section id="cartpage" hidden>
-  <div class="dbar"><button id="cback" type="button" aria-label="back">←</button><h2>장바구니</h2><span></span></div>
+  <div class="dbar"><button id="cback" type="button" aria-label="back">←</button><h2>장바구니</h2>
+    <div class="tbtns">
+      <button id="ccbtn" class="ibtn" type="button" aria-label="장바구니" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg><span class="badge cartn" hidden></span></button>
+      <button class="ibtn mbtn" type="button" aria-label="메뉴"><svg class="icm" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
   <div class="ctools">
     <label class="chk"><input id="call" type="checkbox"><i></i>전체 선택 <span id="cseln"></span></label>
   </div>
@@ -172,6 +181,6 @@
 
 <div id="toast" hidden></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=261101"></script>
 </body>
 </html>

@@ -58,7 +58,7 @@ function renderChips() {
   if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
-// ===== ☰ 메뉴: 소분류 있는 대분류별 소분류 목록 (대분류 이름 = 그 대분류 전체) =====
+// ===== ☰ 메뉴: 대분류별 소분류 목록 (대분류 이름 = 그 대분류 전체) =====
 function menuList() {
   const ul = $('#mlist');
   ul.innerHTML = '';
@@ -72,11 +72,20 @@ function menuList() {
     li.appendChild(b);
     ul.appendChild(li);
   };
-  Object.keys(CONFIG.sub).forEach((c1) => {
-    add(c1, 'mhead', state.cat1 === c1 && state.cat2 === 'all', () => setCat(c1, 'all'));
-    CONFIG.sub[c1].forEach((c2) => add(c2, 'msub', state.cat1 === c1 && state.cat2 === c2, () => setCat(c1, c2)));
+  CONFIG.cat1.filter((c1) => c1 !== 'all').forEach((c1) => {
+    add(c1, 'mhead', state.cat1 === c1 && state.cat2 === 'all', () => menuGo(c1, 'all'));
+    (CONFIG.sub[c1] || []).forEach((c2) => add(c2, 'msub', state.cat1 === c1 && state.cat2 === c2, () => menuGo(c1, c2)));
   });
   ul.scrollTop = 0;
+}
+// 메뉴 선택: 상세·장바구니에서 열었으면 메뉴 기록을 목록 주소로 바꿔 화면 닫기 (뒤로가기 = 이전 화면)
+function menuGo(c1, c2) {
+  if (location.hash) {
+    $('#menu').hidden = true;
+    history.replaceState(null, '', location.pathname + location.search);
+    route();
+  }
+  setCat(c1, c2);
 }
 function setCat(c1, c2) {
   state.cat1 = c1;
@@ -90,18 +99,21 @@ function openMenu() {
   document.body.style.overflow = 'hidden';
   history.pushState({ menu: 1 }, '');   // 휴대폰 뒤로가기 = 메뉴 닫기
 }
+// 메뉴 닫은 뒤 상세·장바구니 위면 뒤 화면 스크롤 잠금 유지
+const menuUnlock = () => { document.body.style.overflow = location.hash ? 'hidden' : ''; };
 function closeMenu() {
   if ($('#menu').hidden) return;
   $('#menu').hidden = true;
-  document.body.style.overflow = '';
+  menuUnlock();
   if (history.state && history.state.menu) history.back();
 }
-$('#mbtn').onclick = openMenu;
+document.querySelectorAll('.mbtn').forEach((b) => { b.onclick = openMenu; });
 $('#mclose').onclick = closeMenu;
+$('#menu').onclick = (e) => { if (e.target === $('#menu')) closeMenu(); };
 window.addEventListener('popstate', () => {
   if ($('#menu').hidden) return;
   $('#menu').hidden = true;
-  document.body.style.overflow = '';
+  menuUnlock();
 });
 // 소분류 표시 줄 (소분류 선택 시만), ✕ → 대분류 전체로
 function showCrumb() {
@@ -406,19 +418,16 @@ function renderRec(p) {
     row.appendChild(c);
   });
   row.scrollLeft = 0;
-  $('#rec').hidden = $('#recgo').hidden = !list.length;
+  $('#rec').hidden = !list.length;
 }
 const recBy = (d) => $('#recrow').scrollBy({ left: d * $('#recrow').clientWidth * 0.8, behavior: 'smooth' });
 $('#recprev').onclick = () => recBy(-1);
 $('#recnext').onclick = () => recBy(1);
-// 바로가기: 애니메이션 없이 즉시 이동 (지나가는 상세 사진을 불러오지 않음)
-$('#recgo').onclick = () => $('#rec').scrollIntoView({ behavior: 'instant', block: 'start' });
 // 이 상품의 카테고리 목록으로 이동 (소분류 있으면 소분류, 없으면 대분류 전체)
 function goCatOf(p) {
   location.hash = '';
   setCat(p.cat1, CONFIG.sub[p.cat1] && CONFIG.sub[p.cat1].includes(p.cat2) ? p.cat2 : 'all');
 }
-$('#recall').onclick = () => { if (current) goCatOf(current); };
 
 function closeDetail() {
   current = null;

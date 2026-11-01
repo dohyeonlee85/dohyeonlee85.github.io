@@ -27,7 +27,7 @@ header {
   border-bottom: 1px solid var(--dust-grey);
 }
 .bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px 2px 12px; }
-.logo { font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 1px; }
+.logo { font-size: 20px; font-weight: 400; color: var(--text); text-decoration: none; letter-spacing: 1px; }
 input, button { font-family: inherit; }
 .logo { margin-right: auto; }
 .ibtn {
@@ -38,6 +38,13 @@ input, button { font-family: inherit; }
 .ibtn .badge { top: 0; right: -2px; }
 /* 첨부 장바구니 아이콘: 글자색 따라감 */
 .ic { width: 22px; height: 21px; fill: currentColor; flex: none; }
+.icm { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; flex: none; }
+/* 상세·장바구니 상단 오른쪽 버튼: .bar와 같은 간격 */
+.tbtns { display: flex; gap: 8px; }
+#ccbtn { cursor: default; }
+/* 스크롤바 유무와 무관하게 상단 버튼 위치 고정 */
+html { scrollbar-gutter: stable both-edges; }
+#detail, #cartpage { scrollbar-width: none; }
 /* 🔍 누르면 로고 자리에 검색창 펼침 */
 #search { display: none; }
 .bar.searching .logo { display: none; }
@@ -69,12 +76,19 @@ input, button { font-family: inherit; }
 #crumb[hidden] { display: none; }
 #crumbx { width: 28px; height: 28px; font-size: 14px; color: var(--text-sub); }
 
-/* ☰ 전체 화면 메뉴 */
+/* ☰ 왼쪽 슬라이드 메뉴 */
 #menu {
   position: fixed; inset: 0; z-index: 30;
-  background: var(--linen); display: flex; flex-direction: column;
+  background: rgba(0, 0, 0, .35); animation: mfade .22s ease-out;
 }
 #menu[hidden] { display: none; }
+.mpanel {
+  width: 75%; max-width: 320px; height: 100%;
+  background: var(--linen); display: flex; flex-direction: column;
+  animation: mslide .22s ease-out;
+}
+@keyframes mfade { from { opacity: 0; } }
+@keyframes mslide { from { transform: translateX(-100%); } }
 .mbar {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 12px; border-bottom: 1px solid var(--dust-grey);
@@ -84,11 +98,11 @@ input, button { font-family: inherit; }
 #mlist { list-style: none; overflow-y: auto; padding: 8px 0; }
 #mlist button {
   display: block; width: 100%; text-align: left;
-  padding: 16px 24px; font-size: 22px; letter-spacing: .5px;
+  padding: 16px 24px; font-size: 16px; letter-spacing: .5px;
   border-bottom: 1px solid var(--powder-petal);
 }
 #mlist .mhead { padding: 18px 24px 10px; font-size: 15px; font-weight: 700; color: var(--text-sub); }
-#mlist .msub { padding: 12px 24px 12px 40px; font-size: 20px; }
+#mlist .msub { padding: 12px 24px 12px 40px; font-size: 16px; }
 #mlist button.on { font-weight: 700; color: #b8833a; }
 
 /* 신상 가로줄 + 전체 3열 그리드 */
@@ -138,7 +152,7 @@ input, button { font-family: inherit; }
   .grid { grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 0 12px; }
   .row { gap: 6px; padding: 0 12px; scroll-padding: 0 12px; }
   .row .card { width: calc((100% - 18px) / 3.5); }   /* PC 3.5장 */
-  main, header, #detail { max-width: 1100px; margin: 0 auto; }
+  main, header, #detail, #cartpage { max-width: 1100px; margin: 0 auto; }
 }
 
 /* 상세 화면 */
@@ -151,7 +165,7 @@ input, button { font-family: inherit; }
 .dbar {
   position: sticky; top: 0; z-index: 2;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; background: var(--linen); border-bottom: 1px solid var(--dust-grey);
+  padding: 6px 8px 6px 12px; background: var(--linen); border-bottom: 1px solid var(--dust-grey);
 }
 #back { font-size: 22px; padding: 0 8px; }
 #dcbtn { color: var(--text); }
@@ -197,16 +211,10 @@ input, button { font-family: inherit; }
 /* 상세 맨 아래: 같은 카테고리 추천 */
 #rec { flex: none; padding: 20px 0 16px; scroll-margin-top: 50px; }
 #rec[hidden] { display: none; }
-#rec h2 { padding: 0 12px 8px; }
+#rec h2 { font-size: 14px; font-weight: 600; padding: 0 12px 8px; }
 .recwrap { position: relative; }
 #recrow .card { width: calc((100% - 9px) / 3.5); }   /* 휴대폰 3.5장 */
 #recprev, #recnext { display: none; }
-#recall {
-  display: block; width: calc(100% - 24px); height: 44px; margin: 12px 12px 0;
-  border: 1px solid var(--dust-grey); border-radius: 10px; font-size: 14px; font-weight: 600;
-}
-#recgo { align-self: flex-start; padding: 2px 0; font-size: 13px; color: var(--text-sub); text-decoration: underline; }
-#recgo[hidden] { display: none; }
 @media (min-width: 700px) {
   #recrow .card { width: calc((100% - 30px) / 5.5); }   /* PC 5.5장 */
   #recprev, #recnext { display: flex; width: 34px; height: 34px; }
@@ -271,8 +279,8 @@ input, button { font-family: inherit; }
   font-family: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
 }
 #cartpage[hidden] { display: none; }
-#cartpage .dbar h2 { font-size: 17px; font-weight: 700; }
-#cartpage .dbar span, #cback { width: 38px; }
+#cartpage .dbar h2 { position: absolute; left: 50%; transform: translateX(-50%); font-size: 17px; font-weight: 700; }
+#cback { width: 38px; }
 #cback { font-size: 22px; text-align: left; padding: 0 8px; }
 .ctools[hidden], .cbtns[hidden] { display: none; }
 .ctools {
