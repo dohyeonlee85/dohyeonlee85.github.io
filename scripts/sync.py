@@ -27,7 +27,7 @@ THUMB_QUALITY = 75
 DETAIL_QUALITY = 82
 CATS1 = {'padding', 'coat', 'shoes', 'muffler'}
 NO_SUB = {'muffler'}    # 소분류 없는 대분류 (소분류 칸 무시)
-CATS2 = {'women', 'men', 'etc', 'boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers'}
+CATS2 = {'women', 'men', 'etc', 'boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers', 'ugg'}
 
 
 def google_services():

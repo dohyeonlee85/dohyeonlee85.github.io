@@ -35,7 +35,7 @@ CATS = {
     '코트-여성': ('coat', 'women'), '코트-남성': ('coat', 'men'),
     '신발-부츠': ('shoes', 'boots'), '신발-슬라이드': ('shoes', 'slides'), '신발-플랫': ('shoes', 'flats'),
     '신발-로퍼': ('shoes', 'loafers'), '신발-힐': ('shoes', 'heels'), '신발-스니커즈': ('shoes', 'sneakers'),
-    '신발-기타': ('shoes', 'etc'),
+    '신발-어그': ('shoes', 'ugg'), '신발-기타': ('shoes', 'etc'),
     '머플러': ('muffler', ''),
     # 옛 분류값: shoes 탭(all)에만 표시 → 신발-부츠 등으로 바꾼 뒤 삭제 가능
     '여성-신발': ('shoes', ''), '남성-신발': ('shoes', ''),

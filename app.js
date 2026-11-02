@@ -7,7 +7,7 @@ const CONFIG = {
   sub: {
     padding: ['women', 'men'],
     coat: ['women', 'men'],
-    shoes: ['boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers', 'etc'],
+    shoes: ['boots', 'slides', 'flats', 'loafers', 'heels', 'sneakers', 'ugg', 'etc'],
   },
   pageSize: 60, // 한 번에 그리는 상품 수 (스크롤 시 추가)
   newCount: 25, // 신상 가로줄 상품 수 (카테고리 상품이 이 수 이하이면 가로줄 숨김)
