@@ -439,11 +439,12 @@ def publish_fb(sheets, r2, sid, base, site, fs, daily):
         photos = int(float(get(r, '사진수') or 0))
         v = int(float(get(r, '버전') or 0))
         name, price = get(r, '상품명'), to_price(get(r, '가격'))
-        sig = f'{cat}|{name}|{price}|{v}'
+        desc = get(r, '설명')   # 시트 G열 설명 → 상세화면 (2026-11-24)
+        sig = f'{cat}|{name}|{price}|{v}|{desc}'
         shown += 1
         if sig == synced:
             continue
-        fields = {'group': g.strip(), 'category': c.strip(), 'name': name, 'price': price,
+        fields = {'group': g.strip(), 'category': c.strip(), 'name': name, 'price': price, 'desc': desc,
                   'T': [photo_url(base, site, pid, f'{k}.webp', v) for k in range(1, photos + 1)],
                   'TP': [''] * photos}
         if not synced:   # 처음 등록: admin이 쓰는 나머지 값도 기본값으로
