@@ -221,6 +221,23 @@ def group(files):
     return groups
 
 
+def last_row(sheets, sid, site):
+    """값이 있는 마지막 행 번호 (중간 빈 행은 건너뛰지 않음)."""
+    rows = sheets.spreadsheets().values().get(
+        spreadsheetId=sid, range=f"'{site['tab']}'").execute().get('values', [])
+    return max([n for n, r in enumerate(rows, start=1) if any(str(c).strip() for c in r)], default=1)
+
+
+def ensure_rows(sheets, sid, site, need):
+    """시트 행 수가 need보다 적으면 500행 늘림."""
+    props = tab_props(sheets, sid)[site['tab']]
+    have = props['gridProperties']['rowCount']
+    if need > have:
+        sheets.spreadsheets().batchUpdate(spreadsheetId=sid, body={'requests': [
+            {'appendDimension': {'sheetId': props['sheetId'], 'dimension': 'ROWS',
+                                 'length': need - have + 500}}]}).execute()
+
+
 def upload_group(r2, key, files):
     def one(job):
         n, f = job
@@ -245,7 +262,12 @@ def process_new(sheets, drive, r2, sid, base, used, site):
 
     today = datetime.now(KST).date()
     added, failed = 0, 0
-    for files in group(new):
+    # 새 줄은 항상 시트 맨 끝 다음 행에 직접 씀 (2026-11-28)
+    # append는 중간 빈 행에 계속 덮어쓰는 문제가 있었음 (업로드03 1606행)
+    next_row = last_row(sheets, sid, site) + 1
+    groups = group(new)
+    ensure_rows(sheets, sid, site, next_row + len(groups))
+    for files in groups:
         pid = next_id(today, used)
         try:
             # 기본 역순 (파일 이름 마지막 사진 → 1번)
@@ -257,10 +279,10 @@ def process_new(sheets, drive, r2, sid, base, used, site):
         used.add(pid)
         row = {ID_HEADER: "'" + pid, '썸네일': thumb_formula(base, site, pid, 0),
                '사진수': len(files), '파일': ','.join(f['id'] for f in files)}
-        sheets.spreadsheets().values().append(
-            spreadsheetId=sid, range=f"'{site['tab']}'!A1", valueInputOption='USER_ENTERED',
-            insertDataOption='OVERWRITE',
+        sheets.spreadsheets().values().update(
+            spreadsheetId=sid, range=f"'{site['tab']}'!A{next_row}", valueInputOption='USER_ENTERED',
             body={'values': [[row.get(h, '') for h in header]]}).execute()
+        next_row += 1
         added += 1
         print(f'{site["name"]} 업로드 → {pid} (사진 {len(files)}장, 분류 대기)')
     return added, failed
@@ -415,6 +437,19 @@ def publish_fb(sheets, r2, sid, base, site, fs, daily):
     project = site['project']
     existing = firestore.doc_ids(fs, project) if daily else None
     updates, gone = [], []
+    conn = [sheets]
+
+    def save(force=False):
+        # 반영 칸을 50개마다 바로 저장 (오래 걸려 연결이 끊겨도 한 일은 남게, 2026-11-28)
+        if not updates or (not force and len(updates) < 50):
+            return
+        body = {'valueInputOption': 'RAW', 'data': list(updates)}
+        try:
+            conn[0].spreadsheets().values().batchUpdate(spreadsheetId=sid, body=body).execute()
+        except Exception:   # 연결 끊김 → 새 연결로 한 번 더
+            conn[0] = google_services()[0]
+            conn[0].spreadsheets().values().batchUpdate(spreadsheetId=sid, body=body).execute()
+        updates.clear()
     shown, waiting = 0, 0
     for n, r in rows:
         pid = get(r, ID_HEADER)
@@ -465,9 +500,8 @@ def publish_fb(sheets, r2, sid, base, site, fs, daily):
             continue
         updates.append({'range': cell(site, header, SYNCED, n), 'values': [[sig]]})
         print(f'{site["name"]} {pid} 사이트 반영 ({"새 상품" if not synced else "수정"})')
-    if updates:
-        sheets.spreadsheets().values().batchUpdate(spreadsheetId=sid, body={
-            'valueInputOption': 'RAW', 'data': updates}).execute()
+        save()
+    save(force=True)
     if gone:
         print(f'{site["name"]} admin에서 삭제된 상품 {len(gone)}개 정리: {", ".join(gone)}')
     print(f'{site["tab"]} 탭: 공개 {shown} / 분류 대기 {waiting}')
